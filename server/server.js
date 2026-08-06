@@ -8,6 +8,7 @@ const errorHandler = require("./middleware/errorHandler");
 
 // Routes
 const authRoutes = require("./routes/authRoutes");
+const movieRoutes = require("./routes/movieRoutes");
 
 dotenv.config();
 
@@ -29,6 +30,8 @@ app.get("/", (req, res) => {
 
 // Authentication Routes
 app.use("/api/auth", authRoutes);
+// Movie Routes
+app.use("/api/movies", movieRoutes);
 
 // Global Error Handler (Always Last)
 app.use(errorHandler);
