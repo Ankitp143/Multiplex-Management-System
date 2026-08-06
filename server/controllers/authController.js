@@ -1,44 +1,53 @@
-const {
-    registerUser,
-    loginUser,
-} = require("../services/authService");
+const { validationResult } = require("express-validator");
+const authService = require("../services/authService");
+const apiResponse = require("../utils/apiResponse");
 
-const { successResponse } = require("../utils/apiResponse");
-const asyncHandler = require("../middleware/asyncHandler");
+const register = async (req, res, next) => {
+    try {
+        const errors = validationResult(req);
 
-/**
- * Register User
- */
-const register = asyncHandler(async (req, res) => {
+        if (!errors.isEmpty()) {
+            return apiResponse.validationError(res, errors.array());
+        }
 
-    const user = await registerUser(req.body);
+        const user = await authService.registerUser(req.body);
 
-    return successResponse(
-        res,
-        201,
-        "User registered successfully",
-        user
-    );
-});
+        return apiResponse.success(
+            res,
+            "User registered successfully",
+            user,
+            201
+        );
 
-/**
- * Login User
- */
-const login = asyncHandler(async (req, res) => {
+    } catch (error) {
+        next(error);
+    }
+};
 
-    const { email, password } = req.body;
+const login = async (req, res, next) => {
+    try {
+        const errors = validationResult(req);
 
-    const result = await loginUser(email, password);
+        if (!errors.isEmpty()) {
+            return apiResponse.validationError(res, errors.array());
+        }
 
-    return successResponse(
-        res,
-        200,
-        "Login successful",
-        result
-    );
-});
+        const { email, password } = req.body;
+
+        const result = await authService.loginUser(email, password);
+
+        return apiResponse.success(
+            res,
+            "Login successful",
+            result
+        );
+
+    } catch (error) {
+        next(error);
+    }
+};
 
 module.exports = {
     register,
-    login,
+    login
 };

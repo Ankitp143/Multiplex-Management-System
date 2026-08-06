@@ -1,12 +1,12 @@
-const { errorResponse } = require("../utils/apiResponse");
+const apiResponse = require("../utils/apiResponse");
 
 const errorHandler = (err, req, res, next) => {
-    console.error(err);
+    console.error("❌ Error:", err);
 
-    return errorResponse(
+    return apiResponse.error(
         res,
-        err.statusCode || 500,
-        err.message || "Internal Server Error"
+        err.message || "Internal Server Error",
+        err.statusCode || 500
     );
 };
 
