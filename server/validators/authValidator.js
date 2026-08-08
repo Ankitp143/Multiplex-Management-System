@@ -1,69 +1,29 @@
-const { body, validationResult } = require("express-validator");
+const { body } = require("express-validator");
+const validate = require("../middleware/validationMiddleware");
 
-/**
- * Handle Validation Errors
- */
-const validate = (req, res, next) => {
-    const errors = validationResult(req);
-
-    if (!errors.isEmpty()) {
-        return res.status(400).json({
-            success: false,
-            errors: errors.array(),
-        });
-    }
-
-    next();
-};
-
-/**
- * Registration Validation
- */
 const registerValidator = [
-    body("firstName")
-        .trim()
-        .notEmpty()
-        .withMessage("First name is required"),
-
-    body("lastName")
-        .trim()
-        .notEmpty()
-        .withMessage("Last name is required"),
-
-    body("email")
-        .trim()
-        .isEmail()
-        .withMessage("Please enter a valid email"),
-
-    body("password")
-        .isLength({ min: 8 })
-        .withMessage("Password must be at least 8 characters long"),
-
-    body("phone")
-        .trim()
-        .isMobilePhone()
-        .withMessage("Please enter a valid phone number"),
-
-    validate,
+    body("firstName").trim().notEmpty().withMessage("First name is required"),
+    body("lastName").trim().notEmpty().withMessage("Last name is required"),
+    body("email").trim().isEmail().withMessage("Please enter a valid email"),
+    body("password").isLength({ min: 6 }).withMessage("Password must be at least 6 characters long"),
+    body("phone").trim().notEmpty().withMessage("Phone number is required"),
+    validate
 ];
 
-/**
- * Login Validation
- */
 const loginValidator = [
-    body("email")
-        .trim()
-        .isEmail()
-        .withMessage("Please enter a valid email"),
+    body("email").trim().isEmail().withMessage("Please enter a valid email"),
+    body("password").notEmpty().withMessage("Password is required"),
+    validate
+];
 
-    body("password")
-        .notEmpty()
-        .withMessage("Password is required"),
-
-    validate,
+const changePasswordValidator = [
+    body("currentPassword").notEmpty().withMessage("Current password is required"),
+    body("newPassword").isLength({ min: 6 }).withMessage("New password must be at least 6 characters long"),
+    validate
 ];
 
 module.exports = {
     registerValidator,
     loginValidator,
+    changePasswordValidator
 };

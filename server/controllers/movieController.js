@@ -1,107 +1,36 @@
-const { validationResult } = require("express-validator");
+const asyncHandler = require("../middleware/asyncHandler");
 const movieService = require("../services/movieService");
 const apiResponse = require("../utils/apiResponse");
 
-const createMovie = async (req, res, next) => {
-    try {
-        const errors = validationResult(req);
+const createMovie = asyncHandler(async (req, res) => {
+    const movie = await movieService.createMovie(req.body, req.user.id);
+    return apiResponse.success(res, "Movie created successfully", movie, 201);
+});
 
-        if (!errors.isEmpty()) {
-            return apiResponse.validationError(res, errors.array());
-        }
+const getMovies = asyncHandler(async (req, res) => {
+    const movies = await movieService.getAllMovies(req.query);
+    return apiResponse.success(res, "Movies retrieved successfully", movies);
+});
 
-        const movieData = {
-            ...req.body,
-            createdBy: req.user.id
-        };
+const getMovie = asyncHandler(async (req, res) => {
+    const movie = await movieService.getMovieById(req.params.id);
+    return apiResponse.success(res, "Movie details retrieved successfully", movie);
+});
 
-        const movie = await movieService.createMovie(movieData);
+const updateMovie = asyncHandler(async (req, res) => {
+    const movie = await movieService.updateMovie(req.params.id, req.body);
+    return apiResponse.success(res, "Movie updated successfully", movie);
+});
 
-        return apiResponse.success(
-            res,
-            "Movie created successfully",
-            movie,
-            201
-        );
-    } catch (error) {
-        next(error);
-    }
-};
-
-const getAllMovies = async (req, res, next) => {
-    try {
-        const movies = await movieService.getAllMovies();
-
-        return apiResponse.success(
-            res,
-            "Movies fetched successfully",
-            movies
-        );
-    } catch (error) {
-        next(error);
-    }
-};
-
-const getMovieById = async (req, res, next) => {
-    try {
-        const movie = await movieService.getMovieById(req.params.id);
-
-        if (!movie) {
-            return apiResponse.notFound(res, "Movie not found");
-        }
-
-        return apiResponse.success(
-            res,
-            "Movie fetched successfully",
-            movie
-        );
-    } catch (error) {
-        next(error);
-    }
-};
-
-const updateMovie = async (req, res, next) => {
-    try {
-        const movie = await movieService.updateMovie(
-            req.params.id,
-            req.body
-        );
-
-        if (!movie) {
-            return apiResponse.notFound(res, "Movie not found");
-        }
-
-        return apiResponse.success(
-            res,
-            "Movie updated successfully",
-            movie
-        );
-    } catch (error) {
-        next(error);
-    }
-};
-
-const deleteMovie = async (req, res, next) => {
-    try {
-        const movie = await movieService.deleteMovie(req.params.id);
-
-        if (!movie) {
-            return apiResponse.notFound(res, "Movie not found");
-        }
-
-        return apiResponse.success(
-            res,
-            "Movie deleted successfully"
-        );
-    } catch (error) {
-        next(error);
-    }
-};
+const deleteMovie = asyncHandler(async (req, res) => {
+    await movieService.deleteMovie(req.params.id);
+    return apiResponse.success(res, "Movie deleted successfully");
+});
 
 module.exports = {
     createMovie,
-    getAllMovies,
-    getMovieById,
+    getMovies,
+    getMovie,
     updateMovie,
     deleteMovie
 };

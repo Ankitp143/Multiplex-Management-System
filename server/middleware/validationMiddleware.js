@@ -1,0 +1,16 @@
+const { validationResult } = require("express-validator");
+const apiResponse = require("../utils/apiResponse");
+
+const validate = (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        const formattedErrors = errors.array().map(err => ({
+            field: err.path || err.param,
+            message: err.msg
+        }));
+        return apiResponse.validationError(res, formattedErrors);
+    }
+    next();
+};
+
+module.exports = validate;

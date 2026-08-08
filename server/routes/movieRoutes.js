@@ -1,48 +1,15 @@
-const authorize = require("../middleware/roleMiddleware");
 const express = require("express");
-
 const router = express.Router();
-
 const movieController = require("../controllers/movieController");
-const { createMovieValidator } = require("../validators/movieValidator");
 const authMiddleware = require("../middleware/authMiddleware");
+const authorize = require("../middleware/roleMiddleware");
+const { movieValidator } = require("../validators/movieValidator");
 
-// Create Movie
-router.post(
-    "/",
-    authMiddleware,
-    authorize("admin"),
-    createMovieValidator,
-    movieController.createMovie
-);
+router.get("/", movieController.getMovies);
+router.get("/:id", movieController.getMovie);
 
-// Get All Movies
-router.get(
-    "/",
-    movieController.getAllMovies
-);
-
-// Get Movie By ID
-router.get(
-    "/:id",
-    movieController.getMovieById
-);
-
-// Update Movie
-router.put(
-    "/:id",
-    authMiddleware,
-    authorize("admin"),
-    createMovieValidator,
-    movieController.updateMovie
-);
-
-// Delete Movie
-router.delete(
-    "/:id",
-    authMiddleware,
-    authorize("admin"),
-    movieController.deleteMovie
-);
+router.post("/", authMiddleware, authorize("admin", "theatre_owner"), movieValidator, movieController.createMovie);
+router.put("/:id", authMiddleware, authorize("admin", "theatre_owner"), movieValidator, movieController.updateMovie);
+router.delete("/:id", authMiddleware, authorize("admin"), movieController.deleteMovie);
 
 module.exports = router;

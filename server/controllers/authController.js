@@ -1,53 +1,56 @@
-const { validationResult } = require("express-validator");
+const asyncHandler = require("../middleware/asyncHandler");
 const authService = require("../services/authService");
 const apiResponse = require("../utils/apiResponse");
 
-const register = async (req, res, next) => {
-    try {
-        const errors = validationResult(req);
+const register = asyncHandler(async (req, res) => {
+    const data = await authService.registerUser(req.body);
+    return apiResponse.success(res, "Registration successful", data, 201);
+});
 
-        if (!errors.isEmpty()) {
-            return apiResponse.validationError(res, errors.array());
-        }
+const login = asyncHandler(async (req, res) => {
+    const { email, password, role } = req.body;
+    const data = await authService.loginUser(email, password, role);
+    return apiResponse.success(res, "Login successful", data);
+});
 
-        const user = await authService.registerUser(req.body);
+const getProfile = asyncHandler(async (req, res) => {
+    const user = await authService.getUserProfile(req.user.id);
+    return apiResponse.success(res, "Profile retrieved successfully", user);
+});
 
-        return apiResponse.success(
-            res,
-            "User registered successfully",
-            user,
-            201
-        );
+const updateProfile = asyncHandler(async (req, res) => {
+    const user = await authService.updateUserProfile(req.user.id, req.body);
+    return apiResponse.success(res, "Profile updated successfully", user);
+});
 
-    } catch (error) {
-        next(error);
-    }
-};
+const changePassword = asyncHandler(async (req, res) => {
+    const { currentPassword, newPassword } = req.body;
+    await authService.changePassword(req.user.id, currentPassword, newPassword);
+    return apiResponse.success(res, "Password changed successfully");
+});
 
-const login = async (req, res, next) => {
-    try {
-        const errors = validationResult(req);
+const getAllUsers = asyncHandler(async (req, res) => {
+    const users = await authService.getAllUsers();
+    return apiResponse.success(res, "Users retrieved successfully", users);
+});
 
-        if (!errors.isEmpty()) {
-            return apiResponse.validationError(res, errors.array());
-        }
+const updateUserByAdmin = asyncHandler(async (req, res) => {
+    const user = await authService.updateUserByAdmin(req.params.id, req.body);
+    return apiResponse.success(res, "User updated successfully", user);
+});
 
-        const { email, password } = req.body;
-
-        const result = await authService.loginUser(email, password);
-
-        return apiResponse.success(
-            res,
-            "Login successful",
-            result
-        );
-
-    } catch (error) {
-        next(error);
-    }
-};
+const deleteUser = asyncHandler(async (req, res) => {
+    await authService.deleteUser(req.params.id, req.user);
+    return apiResponse.success(res, "User removed successfully");
+});
 
 module.exports = {
     register,
-    login
+    login,
+    getProfile,
+    updateProfile,
+    changePassword,
+    getAllUsers,
+    updateUserByAdmin,
+    deleteUser
 };

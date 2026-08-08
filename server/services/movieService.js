@@ -1,34 +1,49 @@
 const Movie = require("../models/Movie");
+const AppError = require("../utils/AppError");
 
-const createMovie = async (movieData) => {
-    const movie = await Movie.create(movieData);
+const createMovie = async (movieData, userId) => {
+    const movie = await Movie.create({
+        ...movieData,
+        createdBy: userId
+    });
     return movie;
 };
 
-const getAllMovies = async () => {
-    return await Movie.find()
-        .populate("createdBy", "firstName lastName email")
-        .sort({ createdAt: -1 });
+const getAllMovies = async (query = {}) => {
+    const filter = {};
+    if (query.genre) filter.genre = new RegExp(query.genre, "i");
+    if (query.language) filter.language = new RegExp(query.language, "i");
+    if (query.status) filter.status = query.status;
+    if (query.search) filter.title = new RegExp(query.search, "i");
+
+    return await Movie.find(filter).sort("-createdAt");
 };
 
-const getMovieById = async (id) => {
-    return await Movie.findById(id)
-        .populate("createdBy", "firstName lastName email");
+const getMovieById = async (movieId) => {
+    const movie = await Movie.findById(movieId);
+    if (!movie) {
+        throw new AppError("Movie not found", 404);
+    }
+    return movie;
 };
 
-const updateMovie = async (id, updatedData) => {
-    return await Movie.findByIdAndUpdate(
-        id,
-        updatedData,
-        {
-            new: true,
-            runValidators: true
-        }
-    );
+const updateMovie = async (movieId, updateData) => {
+    const movie = await Movie.findByIdAndUpdate(movieId, updateData, {
+        new: true,
+        runValidators: true
+    });
+    if (!movie) {
+        throw new AppError("Movie not found", 404);
+    }
+    return movie;
 };
 
-const deleteMovie = async (id) => {
-    return await Movie.findByIdAndDelete(id);
+const deleteMovie = async (movieId) => {
+    const movie = await Movie.findByIdAndDelete(movieId);
+    if (!movie) {
+        throw new AppError("Movie not found", 404);
+    }
+    return true;
 };
 
 module.exports = {
