@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { theatreAPI } from '../../services/apiServices';
 import Navbar from '../../components/common/Navbar';
+import Footer from '../../components/common/Footer';
 
 const TheatresListPage = () => {
   const [theatres, setTheatres] = useState([]);
@@ -72,6 +73,7 @@ const TheatresListPage = () => {
           </div>
         )}
       </div>
+      <Footer />
     </>
   );
 };

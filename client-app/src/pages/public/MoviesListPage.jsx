@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { movieAPI } from '../../services/apiServices';
 import Navbar from '../../components/common/Navbar';
+import Footer from '../../components/common/Footer';
 
 const GENRES = ['All', 'Action', 'Drama', 'Sci-Fi', 'Comedy', 'Horror', 'Biography', 'Animation'];
 const STATUSES = ['All', 'Now Showing', 'Coming Soon'];
@@ -90,6 +91,7 @@ const MoviesListPage = () => {
           </div>
         )}
       </div>
+      <Footer />
     </>
   );
 };

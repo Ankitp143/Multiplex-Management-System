@@ -1,5 +1,6 @@
 import { Outlet } from 'react-router-dom';
 import Navbar from '../common/Navbar';
+import Footer from '../common/Footer';
 import { AdminSidebar, OwnerSidebar, StaffSidebar } from '../common/Sidebar';
 import { useAuth } from '../../context/AuthContext.jsx';
 
@@ -19,6 +20,7 @@ const Layout = () => {
         <main style={{ padding: '1rem', flexGrow: 1 }}>
           <Outlet />
         </main>
+        <Footer />
       </div>
     </div>
   );

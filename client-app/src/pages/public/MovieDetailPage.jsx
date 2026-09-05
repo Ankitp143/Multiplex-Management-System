@@ -4,6 +4,7 @@ import { movieAPI, reviewAPI, showAPI } from '../../services/apiServices';
 import { useAuth } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
 import Navbar from '../../components/common/Navbar';
+import Footer from '../../components/common/Footer';
 
 const MovieDetailPage = () => {
   const { id } = useParams();
@@ -214,6 +215,7 @@ const MovieDetailPage = () => {
           </div>
         </div>
       </div>
+      <Footer />
     </>
   );
 };

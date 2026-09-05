@@ -4,6 +4,7 @@ import { authAPI } from '../../services/apiServices';
 import { useAuth } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
 import Navbar from '../../components/common/Navbar';
+import Footer from '../../components/common/Footer';
 
 const RegisterPage = () => {
   const { login } = useAuth();
@@ -167,6 +168,7 @@ const RegisterPage = () => {
           </div>
         </div>
       </div>
+      <Footer />
     </>
   );
 };

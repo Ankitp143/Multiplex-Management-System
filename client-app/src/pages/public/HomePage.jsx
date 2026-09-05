@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { movieAPI } from '../../services/apiServices';
 import Navbar from '../../components/common/Navbar';
+import Footer from '../../components/common/Footer';
 
 const GENRES = ['All', 'Action', 'Drama', 'Sci-Fi', 'Comedy', 'Horror', 'Biography', 'Animation'];
 const LANGUAGES = ['All', 'English', 'Hindi', 'Tamil', 'Telugu'];
@@ -121,17 +122,7 @@ const HomePage = () => {
         )}
       </div>
 
-      {/* Footer */}
-      <footer style={{
-        borderTop: '1px solid var(--border)',
-        padding: '24px',
-        textAlign: 'center',
-        color: 'var(--text-muted)',
-        fontSize: '0.85rem',
-        marginTop: 40
-      }}>
-        🎬 CineMax Multiplex Management System &nbsp;|&nbsp; © 2026 Group-13
-      </footer>
+      <Footer />
     </>
   );
 };
