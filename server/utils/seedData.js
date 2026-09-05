@@ -11,7 +11,7 @@ const Coupon = require("../models/Coupon");
 
 dotenv.config();
 
-const MOVIES_DATA = [
+const getMoviesData = () => [
     {
         title: "Avatar: The Way of Water",
         description: "Jake Sully lives with his newfound family formed on the extrasolar moon Pandora. Once a familiar threat returns to finish what was previously started, Jake must work with Neytiri to protect their home.",
@@ -167,7 +167,7 @@ const seedDatabase = async () => {
         await Coupon.collection.drop().catch(() => {});
 
         // 1. Insert 10 Movies
-        const movies = await Movie.insertMany(MOVIES_DATA);
+        const movies = await Movie.insertMany(getMoviesData());
         console.log(`✅ ${movies.length} Movies Seeded with Trailers & Posters`);
 
         // 2. Create Theatre & Screens
@@ -367,5 +367,5 @@ if (require.main === module) {
 
 module.exports = {
     seedDatabase,
-    MOVIES_DATA
+    getMoviesData
 };

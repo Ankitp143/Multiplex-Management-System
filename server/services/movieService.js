@@ -32,10 +32,10 @@ const getAllMovies = async (query = {}) => {
             await seedDatabase();
         } catch (err) {
             console.error("Seed error, attempting direct insert:", err);
-            const { MOVIES_DATA } = require("../utils/seedData");
-            if (MOVIES_DATA) {
+            const { getMoviesData } = require("../utils/seedData");
+            if (getMoviesData) {
                 await Movie.deleteMany({}).catch(() => {});
-                await Movie.insertMany(MOVIES_DATA).catch(() => {});
+                await Movie.insertMany(getMoviesData()).catch(() => {});
             }
         }
     }

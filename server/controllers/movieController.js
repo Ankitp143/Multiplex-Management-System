@@ -10,13 +10,13 @@ const createMovie = asyncHandler(async (req, res) => {
 const getMovies = asyncHandler(async (req, res) => {
     if (req.query.seed === "true") {
         const Movie = require("../models/Movie");
-        const { seedDatabase, MOVIES_DATA } = require("../utils/seedData");
+        const { seedDatabase, getMoviesData } = require("../utils/seedData");
         try {
             await seedDatabase();
         } catch (err) {
             console.error("Seed failed on seed=true flag, direct inserting:", err);
             await Movie.deleteMany({}).catch(() => {});
-            if (MOVIES_DATA) await Movie.insertMany(MOVIES_DATA).catch(() => {});
+            if (getMoviesData) await Movie.insertMany(getMoviesData()).catch(() => {});
         }
     }
     const movies = await movieService.getAllMovies(req.query);
@@ -51,7 +51,8 @@ const seedMovies = asyncHandler(async (req, res) => {
 });
 
 const forceSeedMovies = asyncHandler(async (req, res) => {
-    const { seedDatabase, MOVIES_DATA } = require("../utils/seedData");
+    const Movie = require("../models/Movie");
+    const { seedDatabase, getMoviesData } = require("../utils/seedData");
     try {
         await seedDatabase();
         const movies = await movieService.getAllMovies();
@@ -59,8 +60,8 @@ const forceSeedMovies = asyncHandler(async (req, res) => {
     } catch (err) {
         console.error("Seed error, running direct insert fallback:", err);
         await Movie.deleteMany({}).catch(() => {});
-        const inserted = await Movie.insertMany(MOVIES_DATA);
-        return apiResponse.success(res, "Direct MOVIES_DATA inserted successfully!", { count: inserted.length, movies: inserted });
+        const inserted = await Movie.insertMany(getMoviesData());
+        return apiResponse.success(res, "Direct movies inserted successfully!", { count: inserted.length, movies: inserted });
     }
 });
 
