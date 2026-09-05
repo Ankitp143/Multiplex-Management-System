@@ -27,17 +27,8 @@ const getAllMovies = async (query = {}) => {
     let count = await Movie.countDocuments({});
     if (query.seed === "true" || query.reseed === "true" || count < 10) {
         console.log(`🎬 Triggering full database seed... (count=${count}, seedParam=${query.seed})`);
-        try {
-            const { seedDatabase } = require("../utils/seedData");
-            await seedDatabase();
-        } catch (err) {
-            console.error("Seed error, attempting direct insert:", err);
-            const { getMoviesData } = require("../utils/seedData");
-            if (getMoviesData) {
-                await Movie.deleteMany({}).catch(() => {});
-                await Movie.insertMany(getMoviesData()).catch(() => {});
-            }
-        }
+        const { seedDatabase } = require("../utils/seedData");
+        await seedDatabase();
     }
 
     return await Movie.find(filter).sort("-createdAt");
