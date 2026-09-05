@@ -212,78 +212,64 @@ const seedDatabase = async () => {
 
         console.log("✅ Multiplex Theatres & Screens Created");
 
-        // 3. Create 6 Active Shows for Today
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+        // 3. Create Shows for ALL Now Showing Movies for the Next 14 Days
+        const getTodayUTC = () => {
+            const d = new Date();
+            return new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0));
+        };
 
-        const shows = await Show.create([
-            {
-                movie: movies[0]._id, // Avatar
-                theatre: theatre._id,
-                screen: screen1._id,
-                showDate: today,
-                startTime: "11:00",
-                endTime: "14:15",
-                ticketPrice: 350,
-                status: "Scheduled",
-                bookedSeats: ["A1", "A2"]
-            },
-            {
-                movie: movies[1]._id, // Oppenheimer
-                theatre: theatre._id,
-                screen: screen2._id,
-                showDate: today,
-                startTime: "14:30",
-                endTime: "17:30",
-                ticketPrice: 300,
-                status: "Scheduled",
-                bookedSeats: []
-            },
-            {
-                movie: movies[2]._id, // Interstellar
-                theatre: theatre._id,
-                screen: screen1._id,
-                showDate: today,
-                startTime: "18:00",
-                endTime: "20:50",
-                ticketPrice: 400,
-                status: "Scheduled",
-                bookedSeats: ["B3", "B4", "B5"]
-            },
-            {
-                movie: movies[3]._id, // Dune: Part Two
-                theatre: theatre._id,
-                screen: screen2._id,
-                showDate: today,
-                startTime: "18:30",
-                endTime: "21:15",
-                ticketPrice: 350,
-                status: "Scheduled",
-                bookedSeats: []
-            },
-            {
-                movie: movies[4]._id, // Spider-Man
-                theatre: theatre._id,
-                screen: screen1._id,
-                showDate: today,
-                startTime: "21:15",
-                endTime: "23:35",
-                ticketPrice: 380,
-                status: "Scheduled",
-                bookedSeats: []
-            },
-            {
-                movie: movies[5]._id, // Dark Knight
-                theatre: theatre._id,
-                screen: screen2._id,
-                showDate: today,
-                startTime: "21:45",
-                endTime: "00:20",
-                ticketPrice: 320,
-                status: "Scheduled",
-                bookedSeats: ["C1"]
-            }
-        ]);
+        const todayUTC = getTodayUTC();
+        const nowShowingMovies = movies.filter(m => m.status === "Now Showing");
+        const showTimes = [
+            { start: "10:30", end: "13:30" },
+            { start: "14:00", end: "17:00" },
+            { start: "17:30", end: "20:30" },
+            { start: "21:00", end: "23:55" }
+        ];
+
+        const generatedShows = [];
+        let mIdx = 0;
+
+        for (let dayOffset = 0; dayOffset < 14; dayOffset++) {
+            const sDate = new Date(todayUTC);
+            sDate.setUTCDate(todayUTC.getUTCDate() + dayOffset);
+
+            // Screen 1 shows
+            showTimes.forEach((st, idx) => {
+                const movie = nowShowingMovies[mIdx % nowShowingMovies.length];
+                generatedShows.push({
+                    movie: movie._id,
+                    theatre: theatre._id,
+                    screen: screen1._id,
+                    showDate: sDate,
+                    startTime: st.start,
+                    endTime: st.end,
+                    ticketPrice: 300 + (idx % 2 === 0 ? 50 : 100),
+                    status: "Scheduled",
+                    bookedSeats: dayOffset === 0 && idx === 0 ? ["A1", "A2"] : []
+                });
+                mIdx++;
+            });
+
+            // Screen 2 shows
+            showTimes.forEach((st, idx) => {
+                const movie = nowShowingMovies[mIdx % nowShowingMovies.length];
+                generatedShows.push({
+                    movie: movie._id,
+                    theatre: theatre._id,
+                    screen: screen2._id,
+                    showDate: sDate,
+                    startTime: st.start,
+                    endTime: st.end,
+                    ticketPrice: 280 + (idx % 2 === 0 ? 40 : 80),
+                    status: "Scheduled",
+                    bookedSeats: dayOffset === 0 && idx === 1 ? ["B3", "B4"] : []
+                });
+                mIdx++;
+            });
+        }
+
+        const shows = await Show.create(generatedShows);
 
         console.log(`✅ ${shows.length} Shows Scheduled for Today`);
 

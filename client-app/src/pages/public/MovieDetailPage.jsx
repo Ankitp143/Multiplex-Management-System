@@ -16,7 +16,8 @@ const MovieDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '' });
   const [submittingReview, setSubmittingReview] = useState(false);
-  const [selectedDate, setSelectedDate] = useState('');
+  const getTodayString = () => new Date().toISOString().split('T')[0];
+  const [selectedDate, setSelectedDate] = useState(getTodayString());
 
   useEffect(() => {
     Promise.all([
@@ -29,12 +30,10 @@ const MovieDetailPage = () => {
   }, [id]);
 
   useEffect(() => {
-    if (movie && selectedDate) {
-      showAPI.getAll({ movieId: movie._id, showDate: selectedDate })
-        .then(r => setShows(r.data.data || []))
-        .catch(() => setShows([]));
-    } else if (movie) {
-      showAPI.getAll({ movieId: movie._id })
+    if (movie) {
+      const params = { movieId: movie._id };
+      if (selectedDate) params.showDate = selectedDate;
+      showAPI.getAll(params)
         .then(r => setShows(r.data.data || []))
         .catch(() => setShows([]));
     }

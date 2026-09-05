@@ -41,28 +41,90 @@ const createShow = async (showData) => {
     return show;
 };
 
-const getShows = async (query = {}) => {
-    // Check if fewer than 6 active shows exist in DB
-    const activeShowCount = await Show.countDocuments({ status: { $ne: "Cancelled" } });
-    if (activeShowCount < 6) {
-        console.log(`🎬 Found ${activeShowCount} active shows (expected 6+). Auto-triggering seed...`);
-        try {
-            const { seedDatabase } = require("../utils/seedData");
-            await seedDatabase();
-        } catch (seedErr) {
-            console.error("Auto-seed error in showService:", seedErr);
+const ensureShowsForDate = async (targetDateStr) => {
+    try {
+        const [year, month, day] = targetDateStr.split('-').map(Number);
+        const startOfDay = new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
+        const endOfDay = new Date(Date.UTC(year, month - 1, day, 23, 59, 59, 999));
+
+        const existingCount = await Show.countDocuments({
+            showDate: { $gte: startOfDay, $lte: endOfDay },
+            status: { $ne: "Cancelled" }
+        });
+
+        if (existingCount > 0) return;
+
+        const movies = await Movie.find({ status: "Now Showing" });
+        const theatre = await Theatre.findOne();
+        if (!movies.length || !theatre) return;
+
+        const screens = await Screen.find({ theatre: theatre._id });
+        if (!screens.length) return;
+
+        const screen1 = screens[0];
+        const screen2 = screens[1] || screens[0];
+
+        const showTimes = [
+            { start: "10:30", end: "13:30" },
+            { start: "14:00", end: "17:00" },
+            { start: "17:30", end: "20:30" },
+            { start: "21:00", end: "23:55" }
+        ];
+
+        const newShows = [];
+        let mIdx = 0;
+
+        [screen1, screen2].forEach((screen, screenIdx) => {
+            showTimes.forEach((st, idx) => {
+                const movie = movies[mIdx % movies.length];
+                newShows.push({
+                    movie: movie._id,
+                    theatre: theatre._id,
+                    screen: screen._id,
+                    showDate: startOfDay,
+                    startTime: st.start,
+                    endTime: st.end,
+                    ticketPrice: 280 + (idx * 30) + (screenIdx * 20),
+                    status: "Scheduled",
+                    bookedSeats: []
+                });
+                mIdx++;
+            });
+        });
+
+        if (newShows.length > 0) {
+            await Show.insertMany(newShows);
+            console.log(`🎬 Dynamically created ${newShows.length} shows for date ${targetDateStr}`);
         }
+    } catch (err) {
+        console.error("Error dynamically ensuring shows for date:", err);
+    }
+};
+
+const getShows = async (query = {}) => {
+    const todayStr = new Date().toISOString().split('T')[0];
+
+    if (query.showDate) {
+        const dateStr = typeof query.showDate === 'string'
+            ? query.showDate.split('T')[0]
+            : new Date(query.showDate).toISOString().split('T')[0];
+        await ensureShowsForDate(dateStr);
+    } else {
+        await ensureShowsForDate(todayStr);
     }
 
     const filter = { status: { $ne: "Cancelled" } };
     if (query.movieId) filter.movie = query.movieId;
     if (query.theatreId) filter.theatre = query.theatreId;
+
     if (query.showDate) {
-        const dateObj = new Date(query.showDate);
-        const startOfDay = new Date(dateObj);
-        startOfDay.setHours(0, 0, 0, 0);
-        const endOfDay = new Date(dateObj);
-        endOfDay.setHours(23, 59, 59, 999);
+        const dateStr = typeof query.showDate === 'string'
+            ? query.showDate.split('T')[0]
+            : new Date(query.showDate).toISOString().split('T')[0];
+
+        const [year, month, day] = dateStr.split('-').map(Number);
+        const startOfDay = new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
+        const endOfDay = new Date(Date.UTC(year, month - 1, day, 23, 59, 59, 999));
         filter.showDate = { $gte: startOfDay, $lte: endOfDay };
     }
 

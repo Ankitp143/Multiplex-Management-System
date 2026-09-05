@@ -40,8 +40,16 @@ const SeatSelectionPage = () => {
 
   // Connect Socket.io for Real-time Seat Locking
   useEffect(() => {
-    const socketUrl = window.location.protocol + '//' + window.location.hostname + ':5000';
-    const s = io(socketUrl, { autoConnect: true });
+    const getSocketUrl = () => {
+      const envUrl = import.meta.env.VITE_API_BASE_URL;
+      if (envUrl && envUrl.startsWith('http')) {
+        return envUrl.replace(/\/api\/?$/, '');
+      }
+      return window.location.protocol + '//' + window.location.hostname + ':5000';
+    };
+
+    const socketUrl = getSocketUrl();
+    const s = io(socketUrl, { autoConnect: true, transports: ['websocket', 'polling'] });
 
     s.emit('join_show', { showId, userId: user?.id || 'guest' });
 
