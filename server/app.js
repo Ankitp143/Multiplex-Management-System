@@ -48,6 +48,19 @@ app.use("/api/", limiter);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Direct Seed Route
+app.get("/seed-now", async (req, res) => {
+    try {
+        const Movie = require("./models/Movie");
+        const { seedDatabase } = require("./utils/seedData");
+        await seedDatabase();
+        const movies = await Movie.find();
+        return res.json({ success: true, message: "Seeded 10 movies and active shows successfully!", count: movies.length, movies });
+    } catch (err) {
+        return res.status(500).json({ success: false, error: err.message, stack: err.stack });
+    }
+});
+
 // Health Check
 app.get("/", (req, res) => {
     return res.status(200).json({
