@@ -6,6 +6,17 @@ const authorize = require("../middleware/roleMiddleware");
 const { showValidator, lockSeatValidator } = require("../validators/showValidator");
 
 router.get("/", showController.getShows);
+router.get("/seed", async (req, res) => {
+    const { seedDatabase } = require("../utils/seedData");
+    try {
+        await seedDatabase();
+        const Show = require("../models/Show");
+        const shows = await Show.find().populate("movie");
+        return res.json({ success: true, count: shows.length, message: "Shows reseeded successfully across 14 rolling days!" });
+    } catch (err) {
+        return res.status(500).json({ success: false, error: err.message });
+    }
+});
 router.get("/:id", showController.getShow);
 
 router.post("/", authMiddleware, authorize("admin", "theatre_owner"), showValidator, showController.createShow);
