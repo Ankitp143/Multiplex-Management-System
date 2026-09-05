@@ -11,29 +11,33 @@ const createMovie = async (movieData, userId) => {
 
 const getAllMovies = async (query = {}) => {
     const filter = {};
-    if (query.genre) filter.genre = new RegExp(query.genre, "i");
-    if (query.language) filter.language = new RegExp(query.language, "i");
-    if (query.status) filter.status = query.status;
-    if (query.search) filter.title = new RegExp(query.search, "i");
+    if (query.genre && typeof query.genre === "string" && query.genre.trim()) {
+        filter.genre = new RegExp(query.genre.trim(), "i");
+    }
+    if (query.language && typeof query.language === "string" && query.language.trim()) {
+        filter.language = new RegExp(query.language.trim(), "i");
+    }
+    if (query.status && typeof query.status === "string" && query.status.trim() && query.status !== "all") {
+        filter.status = query.status.trim();
+    }
+    if (query.search && typeof query.search === "string" && query.search.trim()) {
+        filter.title = new RegExp(query.search.trim(), "i");
+    }
 
-    let movies = await Movie.find(filter).sort("-createdAt");
-
-    if (movies.length === 0) {
-        console.log("🎬 0 movies found in database! Triggering automatic seed...");
+    let count = await Movie.countDocuments({});
+    if (count === 0) {
+        console.log("🎬 Movie database is empty! Seeding 10 movies now...");
         try {
-            const { seedDatabase } = require("../utils/seedData");
+            const { MOVIES_DATA, seedDatabase } = require("../utils/seedData");
             await seedDatabase();
-            movies = await Movie.find(filter).sort("-createdAt");
         } catch (err) {
-            console.error("Auto seed failed, inserting inline MOVIES_DATA:", err);
+            console.error("Seed error, attempting direct insert:", err);
             const { MOVIES_DATA } = require("../utils/seedData");
-            if (MOVIES_DATA && MOVIES_DATA.length > 0) {
-                movies = await Movie.insertMany(MOVIES_DATA);
-            }
+            if (MOVIES_DATA) await Movie.insertMany(MOVIES_DATA).catch(() => {});
         }
     }
 
-    return movies;
+    return await Movie.find(filter).sort("-createdAt");
 };
 
 const getMovieById = async (movieId) => {
