@@ -16,7 +16,13 @@ const MovieDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '' });
   const [submittingReview, setSubmittingReview] = useState(false);
-  const getTodayString = () => new Date().toISOString().split('T')[0];
+  const getTodayString = () => {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
   const [selectedDate, setSelectedDate] = useState(getTodayString());
 
   useEffect(() => {
@@ -95,7 +101,7 @@ const MovieDetailPage = () => {
                 <h2 className="section-title" style={{ margin: 0 }}>🎟️ Book Tickets</h2>
                 <input type="date" className="form-input" style={{ width: 'auto' }}
                   value={selectedDate} onChange={e => setSelectedDate(e.target.value)}
-                  min={new Date().toISOString().split('T')[0]} />
+                  min={getTodayString()} />
               </div>
               {shows.length === 0 ? (
                 <div className="empty-state" style={{ padding: '24px 0' }}>

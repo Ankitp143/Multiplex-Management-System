@@ -41,7 +41,7 @@ const createShow = async (showData) => {
     return show;
 };
 
-const ensureShowsForDate = async (targetDateStr, movieId = null) => {
+const ensureShowsForDate = async (targetDateStr) => {
     try {
         const [year, month, day] = targetDateStr.split('-').map(Number);
         const startOfDay = new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
@@ -51,22 +51,17 @@ const ensureShowsForDate = async (targetDateStr, movieId = null) => {
             showDate: { $gte: startOfDay, $lte: endOfDay },
             status: { $ne: "Cancelled" }
         };
-        if (movieId) filter.movie = movieId;
 
         const existingCount = await Show.countDocuments(filter);
-        if (existingCount > 0) return;
+        if (existingCount >= 8) return;
 
-        let targetMovies = [];
-        if (movieId) {
-            const m = await Movie.findById(movieId);
-            if (m) targetMovies = [m];
-        }
-        if (targetMovies.length === 0) {
-            targetMovies = await Movie.find({ status: "Now Showing" });
+        let nowShowingMovies = await Movie.find({ status: "Now Showing" });
+        if (nowShowingMovies.length === 0) {
+            nowShowingMovies = await Movie.find({});
         }
 
         const theatre = await Theatre.findOne();
-        if (!targetMovies.length || !theatre) return;
+        if (!nowShowingMovies.length || !theatre) return;
 
         const screens = await Screen.find({ theatre: theatre._id });
         if (!screens.length) return;
@@ -81,12 +76,16 @@ const ensureShowsForDate = async (targetDateStr, movieId = null) => {
             { start: "21:00", end: "23:55" }
         ];
 
+        if (existingCount > 0 && existingCount < 8) {
+            await Show.deleteMany({ showDate: { $gte: startOfDay, $lte: endOfDay } });
+        }
+
         const newShows = [];
-        let mIdx = 0;
+        let mIdx = (day * 3) % nowShowingMovies.length;
 
         [screen1, screen2].forEach((screen, screenIdx) => {
             showTimes.forEach((st, idx) => {
-                const movie = targetMovies[mIdx % targetMovies.length];
+                const movie = nowShowingMovies[mIdx % nowShowingMovies.length];
                 newShows.push({
                     movie: movie._id,
                     theatre: theatre._id,
@@ -104,7 +103,7 @@ const ensureShowsForDate = async (targetDateStr, movieId = null) => {
 
         if (newShows.length > 0) {
             await Show.insertMany(newShows);
-            console.log(`🎬 Dynamically created ${newShows.length} shows for date ${targetDateStr} (movie: ${movieId || 'all'})`);
+            console.log(`🎬 Dynamically scheduled ${newShows.length} shows for date ${targetDateStr}`);
         }
     } catch (err) {
         console.error("Error dynamically ensuring shows for date:", err);
@@ -117,7 +116,7 @@ const getShows = async (query = {}) => {
         ? (typeof query.showDate === 'string' ? query.showDate.split('T')[0] : new Date(query.showDate).toISOString().split('T')[0])
         : todayStr;
 
-    await ensureShowsForDate(targetDateStr, query.movieId || null);
+    await ensureShowsForDate(targetDateStr);
 
     const filter = { status: { $ne: "Cancelled" } };
     if (query.movieId) filter.movie = query.movieId;
