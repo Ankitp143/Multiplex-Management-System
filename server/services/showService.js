@@ -42,10 +42,10 @@ const createShow = async (showData) => {
 };
 
 const getShows = async (query = {}) => {
-    // Check if 0 active shows exist in DB
+    // Check if fewer than 6 active shows exist in DB
     const activeShowCount = await Show.countDocuments({ status: { $ne: "Cancelled" } });
-    if (activeShowCount === 0) {
-        console.log("🎬 0 active shows found in database! Auto-triggering seed...");
+    if (activeShowCount < 6) {
+        console.log(`🎬 Found ${activeShowCount} active shows (expected 6+). Auto-triggering seed...`);
         try {
             const { seedDatabase } = require("../utils/seedData");
             await seedDatabase();

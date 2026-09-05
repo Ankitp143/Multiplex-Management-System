@@ -17,8 +17,8 @@ const getAllMovies = async (query = {}) => {
     if (query.search) filter.title = new RegExp(query.search, "i");
 
     const totalCount = await Movie.countDocuments();
-    if (totalCount === 0) {
-        console.log("🎬 Database has 0 total movies! Auto-triggering seeding...");
+    if (totalCount < 10) {
+        console.log(`🎬 Found ${totalCount} movies in database (expected 10). Auto-triggering full seeding...`);
         try {
             const { seedDatabase } = require("../utils/seedData");
             await seedDatabase();
