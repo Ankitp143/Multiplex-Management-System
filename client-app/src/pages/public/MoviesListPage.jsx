@@ -70,23 +70,32 @@ const MoviesListPage = () => {
         ) : (
           <div className="movie-grid">
             {movies.map(movie => (
-              <Link key={movie._id} to={`/movie/${movie._id}`} className="movie-card">
-                <img className="movie-card-img" src={movie.poster} alt={movie.title}
-                  onError={e => { e.target.src = 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=500&q=80'; }} />
-                <div className="movie-card-body">
-                  <div className="movie-card-title">{movie.title}</div>
-                  <div className="movie-card-meta">
-                    <span className={`badge ${movie.status === 'Now Showing' ? 'badge-green' : 'badge-blue'}`}>
-                      {movie.status}
-                    </span>
-                    <span className="badge badge-gold">⭐ {movie.averageRating > 0 ? movie.averageRating.toFixed(1) : 'N/A'}</span>
+              <div key={movie._id} className="movie-card" style={{ display: 'flex', flexDirection: 'column' }}>
+                <Link to={`/movie/${movie._id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                  <img className="movie-card-img" src={movie.poster} alt={movie.title}
+                    onError={e => { e.target.src = 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=500&q=80'; }} />
+                </Link>
+                <div className="movie-card-body" style={{ display: 'flex', flexDirection: 'column', flex: 1, justifyContent: 'space-between' }}>
+                  <div>
+                    <Link to={`/movie/${movie._id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                      <div className="movie-card-title">{movie.title}</div>
+                    </Link>
+                    <div className="movie-card-meta">
+                      <span className={`badge ${movie.status === 'Now Showing' ? 'badge-green' : 'badge-blue'}`}>
+                        {movie.status}
+                      </span>
+                      <span className="badge badge-gold">⭐ {movie.averageRating > 0 ? movie.averageRating.toFixed(1) : 'N/A'}</span>
+                    </div>
+                    <div className="movie-card-meta" style={{ marginTop: 6, marginBottom: 10 }}>
+                      <span>🌐 {movie.language}</span>
+                      <span>⏱ {movie.duration}m</span>
+                    </div>
                   </div>
-                  <div className="movie-card-meta" style={{ marginTop: 6 }}>
-                    <span>🌐 {movie.language}</span>
-                    <span>⏱ {movie.duration}m</span>
-                  </div>
+                  <Link to={`/movie/${movie._id}`} className="btn btn-primary btn-sm" style={{ width: '100%', textAlign: 'center', marginTop: 8 }}>
+                    🎟️ Book Tickets
+                  </Link>
                 </div>
-              </Link>
+              </div>
             ))}
           </div>
         )}
