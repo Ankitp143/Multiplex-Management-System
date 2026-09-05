@@ -269,9 +269,9 @@ const seedDatabase = async () => {
             });
         }
 
-        const shows = await Show.create(generatedShows);
+        const shows = await Show.insertMany(generatedShows);
 
-        console.log(`✅ ${shows.length} Shows Scheduled for Today`);
+        console.log(`✅ ${shows.length} Shows Scheduled across 14 rolling days`);
 
         // 4. Create Snacks
         await Snack.insertMany([
