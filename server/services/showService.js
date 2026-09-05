@@ -56,18 +56,40 @@ const ensureShowsForDate = async (targetDateStr) => {
         if (existingCount >= 8) return;
 
         let nowShowingMovies = await Movie.find({ status: "Now Showing" });
-        if (nowShowingMovies.length === 0) {
+        if (!nowShowingMovies || nowShowingMovies.length === 0) {
             nowShowingMovies = await Movie.find({});
         }
+        if (!nowShowingMovies || nowShowingMovies.length === 0) return;
 
-        const theatre = await Theatre.findOne();
-        if (!nowShowingMovies.length || !theatre) return;
+        let theatre = await Theatre.findOne();
+        if (!theatre) {
+            theatre = await Theatre.create({
+                name: "PVR Grand Cinema",
+                city: "Mumbai",
+                address: "Phoenix Marketcity, Kurla West",
+                phone: "022-67890123",
+                totalScreens: 2
+            });
+        }
 
         let screens = await Screen.find({ theatre: theatre._id });
-        if (!screens.length) {
+        if (!screens || screens.length === 0) {
             screens = await Screen.find({});
         }
-        if (!screens.length) return;
+        if (!screens || screens.length === 0) {
+            const layout = [];
+            const rows = ["A", "B", "C", "D", "E", "F"];
+            rows.forEach(r => {
+                for (let c = 1; c <= 8; c++) {
+                    const type = (r === "E" || r === "F") ? "VIP" : (r === "C" || r === "D" ? "Premium" : "Standard");
+                    const priceMultiplier = type === "VIP" ? 1.5 : (type === "Premium" ? 1.2 : 1.0);
+                    layout.push({ seatNo: `${r}${c}`, row: r, number: c, type, priceMultiplier });
+                }
+            });
+            const s1 = await Screen.create({ theatre: theatre._id, name: "Audi 1 (IMAX 3D)", screenType: "IMAX", seatingCapacity: 48, rows: 6, cols: 8, seatLayout: layout });
+            const s2 = await Screen.create({ theatre: theatre._id, name: "Audi 2 (4DX)", screenType: "4DX", seatingCapacity: 48, rows: 6, cols: 8, seatLayout: layout });
+            screens = [s1, s2];
+        }
 
         const screen1 = screens[0];
         const screen2 = screens[1] || screens[0];
