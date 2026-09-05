@@ -123,15 +123,14 @@ const getShows = async (query = {}) => {
     if (query.movieId) filter.movie = query.movieId;
     if (query.theatreId) filter.theatre = query.theatreId;
 
-    if (query.showDate) {
-        const dateStr = typeof query.showDate === 'string'
-            ? query.showDate.split('T')[0]
-            : new Date(query.showDate).toISOString().split('T')[0];
+    const [year, month, day] = targetDateStr.split('-').map(Number);
+    const startOfDay = new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
+    const endOfDay = new Date(Date.UTC(year, month - 1, day, 23, 59, 59, 999));
 
-        const [year, month, day] = dateStr.split('-').map(Number);
-        const startOfDay = new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
-        const endOfDay = new Date(Date.UTC(year, month - 1, day, 23, 59, 59, 999));
+    if (query.showDate) {
         filter.showDate = { $gte: startOfDay, $lte: endOfDay };
+    } else {
+        filter.showDate = { $gte: startOfDay };
     }
 
     if (query.city) {
