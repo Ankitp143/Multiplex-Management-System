@@ -350,7 +350,7 @@ const seedDatabase = async () => {
         return true;
     } catch (err) {
         console.error("❌ Seed Error:", err);
-        return false;
+        throw err;
     }
 };
 
