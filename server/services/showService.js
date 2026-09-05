@@ -63,7 +63,10 @@ const ensureShowsForDate = async (targetDateStr) => {
         const theatre = await Theatre.findOne();
         if (!nowShowingMovies.length || !theatre) return;
 
-        const screens = await Screen.find({ theatre: theatre._id });
+        let screens = await Screen.find({ theatre: theatre._id });
+        if (!screens.length) {
+            screens = await Screen.find({});
+        }
         if (!screens.length) return;
 
         const screen1 = screens[0];
