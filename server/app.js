@@ -69,6 +69,32 @@ app.get(["/seed-now", "/api/seed-now", "/api/seed-database", "/api/force-seed"],
     }
 });
 
+app.get("/api/debug-shows", async (req, res) => {
+    try {
+        const Show = require("./models/Show");
+        const Movie = require("./models/Movie");
+        const Theatre = require("./models/Theatre");
+        const Screen = require("./models/Screen");
+        const showService = require("./services/showService");
+
+        const queryDate = req.query.date || "2026-09-06";
+        const fetchedShows = await showService.getShows({ showDate: queryDate });
+        const allShows = await Show.find().populate("movie");
+
+        return res.json({
+            success: true,
+            fetchedForDateCount: fetchedShows.length,
+            totalShowsInDb: allShows.length,
+            showDates: [...new Set(allShows.map(s => s.showDate))],
+            moviesCount: await Movie.countDocuments(),
+            theatresCount: await Theatre.countDocuments(),
+            screensCount: await Screen.countDocuments()
+        });
+    } catch (e) {
+        return res.status(500).json({ error: e.message, stack: e.stack });
+    }
+});
+
 // Health Check
 app.get("/", (req, res) => {
     return res.status(200).json({
