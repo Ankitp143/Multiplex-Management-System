@@ -8,11 +8,33 @@ const createMovie = asyncHandler(async (req, res) => {
 });
 
 const getMovies = asyncHandler(async (req, res) => {
+    const Show = require("../models/Show");
+    const showCount = await Show.countDocuments();
+    if (showCount < 50) {
+        const { seedDatabase } = require("../utils/seedData");
+        try {
+            console.log("🎬 Auto-seeding 14-day schedule from getMovies...");
+            await seedDatabase();
+        } catch (e) {
+            console.error("Auto-seed error in getMovies:", e);
+        }
+    }
     const movies = await movieService.getAllMovies(req.query);
     return apiResponse.success(res, "Movies retrieved successfully", movies);
 });
 
 const getMovie = asyncHandler(async (req, res) => {
+    const Show = require("../models/Show");
+    const showCount = await Show.countDocuments();
+    if (showCount < 50) {
+        const { seedDatabase } = require("../utils/seedData");
+        try {
+            console.log("🎬 Auto-seeding 14-day schedule from getMovie...");
+            await seedDatabase();
+        } catch (e) {
+            console.error("Auto-seed error in getMovie:", e);
+        }
+    }
     const movie = await movieService.getMovieById(req.params.id);
     return apiResponse.success(res, "Movie details retrieved successfully", movie);
 });
