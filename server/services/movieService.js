@@ -16,18 +16,24 @@ const getAllMovies = async (query = {}) => {
     if (query.status) filter.status = query.status;
     if (query.search) filter.title = new RegExp(query.search, "i");
 
-    const totalCount = await Movie.countDocuments();
-    if (totalCount < 10) {
-        console.log(`🎬 Found ${totalCount} movies in database (expected 10). Auto-triggering full seeding...`);
+    let movies = await Movie.find(filter).sort("-createdAt");
+
+    if (movies.length === 0) {
+        console.log("🎬 0 movies found in database! Triggering automatic seed...");
         try {
             const { seedDatabase } = require("../utils/seedData");
             await seedDatabase();
-        } catch (seedErr) {
-            console.error("Auto-seed error in movieService:", seedErr);
+            movies = await Movie.find(filter).sort("-createdAt");
+        } catch (err) {
+            console.error("Auto seed failed, inserting inline MOVIES_DATA:", err);
+            const { MOVIES_DATA } = require("../utils/seedData");
+            if (MOVIES_DATA && MOVIES_DATA.length > 0) {
+                movies = await Movie.insertMany(MOVIES_DATA);
+            }
         }
     }
 
-    return await Movie.find(filter).sort("-createdAt");
+    return movies;
 };
 
 const getMovieById = async (movieId) => {

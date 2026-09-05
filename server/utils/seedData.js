@@ -366,5 +366,6 @@ if (require.main === module) {
 }
 
 module.exports = {
-    seedDatabase
+    seedDatabase,
+    MOVIES_DATA
 };
