@@ -25,15 +25,18 @@ const getAllMovies = async (query = {}) => {
     }
 
     let count = await Movie.countDocuments({});
-    if (count === 0) {
-        console.log("🎬 Movie database is empty! Seeding 10 movies now...");
+    if (count < 10) {
+        console.log(`🎬 Found ${count} movies in database (expected 10). Seeding 10 movies & active shows now...`);
         try {
-            const { MOVIES_DATA, seedDatabase } = require("../utils/seedData");
+            const { seedDatabase } = require("../utils/seedData");
             await seedDatabase();
         } catch (err) {
             console.error("Seed error, attempting direct insert:", err);
             const { MOVIES_DATA } = require("../utils/seedData");
-            if (MOVIES_DATA) await Movie.insertMany(MOVIES_DATA).catch(() => {});
+            if (MOVIES_DATA) {
+                await Movie.deleteMany({}).catch(() => {});
+                await Movie.insertMany(MOVIES_DATA).catch(() => {});
+            }
         }
     }
 
