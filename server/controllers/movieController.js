@@ -8,11 +8,6 @@ const createMovie = asyncHandler(async (req, res) => {
 });
 
 const getMovies = asyncHandler(async (req, res) => {
-    if (req.query.seed === "true" || req.query.reseed === "true") {
-        const { seedDatabase } = require("../utils/seedData");
-        console.log("🎬 Forced reseed requested via API parameter!");
-        await seedDatabase();
-    }
     const movies = await movieService.getAllMovies(req.query);
     return apiResponse.success(res, "Movies retrieved successfully", movies);
 });
