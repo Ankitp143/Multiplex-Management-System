@@ -6,7 +6,7 @@ const authorize = require("../middleware/roleMiddleware");
 const { showValidator, lockSeatValidator } = require("../validators/showValidator");
 
 router.get("/", showController.getShows);
-router.get("/seed", async (req, res) => {
+router.get("/system/seed-shows", async (req, res) => {
     const { seedDatabase } = require("../utils/seedData");
     try {
         await seedDatabase();
