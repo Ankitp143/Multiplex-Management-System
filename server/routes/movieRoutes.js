@@ -5,6 +5,8 @@ const authMiddleware = require("../middleware/authMiddleware");
 const authorize = require("../middleware/roleMiddleware");
 const { movieValidator } = require("../validators/movieValidator");
 
+router.get("/seed", movieController.seedMovies);
+router.post("/seed", movieController.seedMovies);
 router.get("/", movieController.getMovies);
 router.get("/:id", movieController.getMovie);
 

@@ -27,10 +27,21 @@ const deleteMovie = asyncHandler(async (req, res) => {
     return apiResponse.success(res, "Movie deleted successfully");
 });
 
+const seedMovies = asyncHandler(async (req, res) => {
+    const { seedDatabase } = require("../utils/seedData");
+    const success = await seedDatabase();
+    if (success) {
+        const movies = await movieService.getAllMovies();
+        return apiResponse.success(res, "Database seeded successfully with 10 movies and active shows", movies);
+    }
+    return apiResponse.error(res, "Database seeding failed", 500);
+});
+
 module.exports = {
     createMovie,
     getMovies,
     getMovie,
     updateMovie,
-    deleteMovie
+    deleteMovie,
+    seedMovies
 };

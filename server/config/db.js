@@ -12,10 +12,10 @@ const connectDB = async () => {
         console.log(`🖥️  Host     : ${connection.connection.host}`);
         console.log("==========================================");
 
-        // Auto seed movies and shows if database is empty
+        // Auto seed movies and shows if database has fewer than 10 movies
         const movieCount = await Movie.countDocuments();
-        if (movieCount === 0) {
-            console.log("🎬 Empty database detected! Auto-seeding 10 movies and show schedules...");
+        if (movieCount < 10) {
+            console.log(`🎬 Found ${movieCount} movies (expected 10). Auto-seeding movies, screens, and shows...`);
             await seedDatabase();
         }
     } catch (error) {
