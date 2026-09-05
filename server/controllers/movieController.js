@@ -39,11 +39,26 @@ const seedMovies = asyncHandler(async (req, res) => {
     }
 });
 
+const forceSeedMovies = asyncHandler(async (req, res) => {
+    const { seedDatabase, MOVIES_DATA } = require("../utils/seedData");
+    try {
+        await seedDatabase();
+        const movies = await movieService.getAllMovies();
+        return apiResponse.success(res, "Database seeded successfully with 10 movies and active shows!", { count: movies.length, movies });
+    } catch (err) {
+        console.error("Seed error, running direct insert fallback:", err);
+        await Movie.deleteMany({}).catch(() => {});
+        const inserted = await Movie.insertMany(MOVIES_DATA);
+        return apiResponse.success(res, "Direct MOVIES_DATA inserted successfully!", { count: inserted.length, movies: inserted });
+    }
+});
+
 module.exports = {
     createMovie,
     getMovies,
     getMovie,
     updateMovie,
     deleteMovie,
-    seedMovies
+    seedMovies,
+    forceSeedMovies
 };
