@@ -11,13 +11,13 @@ const createMovie = async (movieData, userId) => {
 
 const getAllMovies = async (query = {}) => {
     const filter = {};
-    if (query.genre && typeof query.genre === "string" && query.genre.trim()) {
+    if (query.genre && typeof query.genre === "string" && query.genre.trim() && query.genre.toLowerCase() !== "all") {
         filter.genre = new RegExp(query.genre.trim(), "i");
     }
-    if (query.language && typeof query.language === "string" && query.language.trim()) {
+    if (query.language && typeof query.language === "string" && query.language.trim() && query.language.toLowerCase() !== "all") {
         filter.language = new RegExp(query.language.trim(), "i");
     }
-    if (query.status && typeof query.status === "string" && query.status.trim() && query.status !== "all") {
+    if (query.status && typeof query.status === "string" && query.status.trim() && query.status.toLowerCase() !== "all") {
         filter.status = query.status.trim();
     }
     if (query.search && typeof query.search === "string" && query.search.trim()) {
