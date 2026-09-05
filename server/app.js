@@ -49,13 +49,15 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Direct Seed Route
-app.get(["/seed-now", "/api/seed-now"], async (req, res) => {
+app.get(["/seed-now", "/api/seed-now", "/api/seed-database"], async (req, res) => {
     try {
         const Movie = require("./models/Movie");
+        const Show = require("./models/Show");
         const { seedDatabase } = require("./utils/seedData");
         await seedDatabase();
         const movies = await Movie.find();
-        return res.json({ success: true, message: "Seeded 10 movies and active shows successfully!", count: movies.length, movies });
+        const showsCount = await Show.countDocuments();
+        return res.json({ success: true, message: "Seeded 10 movies and 112 shows successfully!", moviesCount: movies.length, showsCount });
     } catch (err) {
         return res.status(500).json({ success: false, error: err.message, stack: err.stack });
     }
