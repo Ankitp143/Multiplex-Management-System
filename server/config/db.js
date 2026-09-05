@@ -16,7 +16,11 @@ const connectDB = async () => {
         const movieCount = await Movie.countDocuments();
         if (movieCount < 10) {
             console.log(`🎬 Found ${movieCount} movies (expected 10). Auto-seeding movies, screens, and shows...`);
-            await seedDatabase();
+            try {
+                await seedDatabase();
+            } catch (seedErr) {
+                console.error("⚠️ Auto-seed warning during DB connect:", seedErr.message);
+            }
         }
     } catch (error) {
         console.error("==========================================");

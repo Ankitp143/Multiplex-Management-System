@@ -42,29 +42,41 @@ const createShow = async (showData) => {
 };
 
 const getShows = async (query = {}) => {
+    // Check if 0 active shows exist in DB
+    const activeShowCount = await Show.countDocuments({ status: { $ne: "Cancelled" } });
+    if (activeShowCount === 0) {
+        console.log("🎬 0 active shows found in database! Auto-triggering seed...");
+        try {
+            const { seedDatabase } = require("../utils/seedData");
+            await seedDatabase();
+        } catch (seedErr) {
+            console.error("Auto-seed error in showService:", seedErr);
+        }
+    }
+
     const filter = { status: { $ne: "Cancelled" } };
     if (query.movieId) filter.movie = query.movieId;
     if (query.theatreId) filter.theatre = query.theatreId;
-    if (query.showDate) filter.showDate = new Date(query.showDate);
-
-    let showsQuery = Show.find(filter)
-        .populate("movie", "title genre language duration certificate poster")
-        .populate("theatre", "name city address")
-        .populate("screen", "name screenType rows cols seatingCapacity")
-        .sort("showDate startTime");
+    if (query.showDate) {
+        const dateObj = new Date(query.showDate);
+        const startOfDay = new Date(dateObj);
+        startOfDay.setHours(0, 0, 0, 0);
+        const endOfDay = new Date(dateObj);
+        endOfDay.setHours(23, 59, 59, 999);
+        filter.showDate = { $gte: startOfDay, $lte: endOfDay };
+    }
 
     if (query.city) {
         const theatresInCity = await Theatre.find({ city: new RegExp(query.city, "i") }).select("_id");
         const theatreIds = theatresInCity.map(t => t._id);
         filter.theatre = { $in: theatreIds };
-        showsQuery = Show.find(filter)
-            .populate("movie", "title genre language duration certificate poster")
-            .populate("theatre", "name city address")
-            .populate("screen", "name screenType rows cols seatingCapacity")
-            .sort("showDate startTime");
     }
 
-    return await showsQuery;
+    return await Show.find(filter)
+        .populate("movie", "title genre language duration certificate poster")
+        .populate("theatre", "name city address")
+        .populate("screen", "name screenType rows cols seatingCapacity")
+        .sort("showDate startTime");
 };
 
 const getShowById = async (showId) => {
