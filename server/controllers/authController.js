@@ -44,6 +44,26 @@ const deleteUser = asyncHandler(async (req, res) => {
     return apiResponse.success(res, "User removed successfully");
 });
 
+const checkOwnerExists = asyncHandler(async (req, res) => {
+    const ownerExists = await authService.checkOwnerExists();
+    return apiResponse.success(res, "Owner check complete", { ownerExists });
+});
+
+const forgotPassword = asyncHandler(async (req, res) => {
+    const data = await authService.forgotPassword(req.body.email);
+    return apiResponse.success(res, data.message, data);
+});
+
+const verifyOtp = asyncHandler(async (req, res) => {
+    const data = await authService.verifyOtp(req.body.email, req.body.otp);
+    return apiResponse.success(res, data.message, data);
+});
+
+const resetPassword = asyncHandler(async (req, res) => {
+    const data = await authService.resetPassword(req.body.email, req.body.otp, req.body.newPassword);
+    return apiResponse.success(res, data.message, data);
+});
+
 module.exports = {
     register,
     login,
@@ -52,5 +72,9 @@ module.exports = {
     changePassword,
     getAllUsers,
     updateUserByAdmin,
-    deleteUser
+    deleteUser,
+    checkOwnerExists,
+    forgotPassword,
+    verifyOtp,
+    resetPassword
 };

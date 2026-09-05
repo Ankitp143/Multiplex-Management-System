@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { ticketAPI } from '../../services/apiServices';
-import Navbar from '../../components/common/Navbar';
 import toast from 'react-hot-toast';
 
 const TicketViewPage = () => {
@@ -16,15 +15,13 @@ const TicketViewPage = () => {
       .finally(() => setLoading(false));
   }, [bookingId]);
 
-  if (loading) return <><Navbar /><div className="loading-page"><div className="spinner"/></div></>;
-  if (!ticket) return <><Navbar /><div className="empty-state"><p>Ticket not found</p></div></>;
+  if (loading) return <div className="loading-page"><div className="spinner"/></div>;
+  if (!ticket) return <div className="empty-state"><p>Ticket not found</p></div>;
 
   const { booking } = ticket;
 
   return (
-    <>
-      <Navbar />
-      <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 16px' }}>
+    <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 16px' }}>
         <div style={{ width: '100%', maxWidth: 480 }}>
           <h1 style={{ textAlign: 'center', marginBottom: 24 }}>🎟️ Your Ticket</h1>
           <div className="card" style={{
@@ -63,7 +60,6 @@ const TicketViewPage = () => {
           </div>
         </div>
       </div>
-    </>
   );
 };
 

@@ -94,6 +94,18 @@ const processPayment = async (paymentData, userId) => {
         type: "Booking"
     });
 
+    // Send Ticket Email Notification
+    try {
+        const User = require("../models/User");
+        const userObj = await User.findById(userId);
+        if (userObj && userObj.email) {
+            const { sendBookingConfirmation } = require("./emailService");
+            sendBookingConfirmation(userObj.email, booking).catch(err => console.error("Email dispatch async error:", err.message));
+        }
+    } catch (e) {
+        console.error("Ticket email error:", e.message);
+    }
+
     return {
         payment,
         ticket,

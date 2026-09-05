@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const bcrypt = require("bcrypt");
 const dotenv = require("dotenv");
 
 const User = require("../models/User");
@@ -17,7 +16,7 @@ const seed = async () => {
         await mongoose.connect(process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/multiplex_management_system");
         console.log("Connected to DB for Seeding...");
 
-        // Clear existing data
+        // Clear all existing collections
         await User.deleteMany();
         await Movie.deleteMany();
         await Theatre.deleteMany();
@@ -26,52 +25,9 @@ const seed = async () => {
         await Snack.deleteMany();
         await Coupon.deleteMany();
 
-        const hashedPassword = await bcrypt.hash("password123", 10);
+        console.log("✅ Cleared all pre-existing user accounts and data");
 
-        // 1. Create Users
-        const admin = await User.create({
-            firstName: "System",
-            lastName: "Admin",
-            email: "admin@mms.com",
-            password: hashedPassword,
-            phone: "9876543210",
-            role: "admin",
-            accountStatus: "Active"
-        });
-
-        const owner = await User.create({
-            firstName: "Rajesh",
-            lastName: "Sharma",
-            email: "owner@mms.com",
-            password: hashedPassword,
-            phone: "9876543211",
-            role: "theatre_owner",
-            accountStatus: "Active"
-        });
-
-        const staff = await User.create({
-            firstName: "Amit",
-            lastName: "Kumar",
-            email: "staff@mms.com",
-            password: hashedPassword,
-            phone: "9876543212",
-            role: "staff",
-            accountStatus: "Active"
-        });
-
-        const customer = await User.create({
-            firstName: "Ankit",
-            lastName: "Prajapati",
-            email: "customer@mms.com",
-            password: hashedPassword,
-            phone: "9876543213",
-            role: "customer",
-            accountStatus: "Active"
-        });
-
-        console.log("✅ Users Seeded");
-
-        // 2. Create Movies
+        // 1. Create Movies (No dummy user required)
         const movies = await Movie.insertMany([
             {
                 title: "Avatar: The Way of Water",
@@ -85,8 +41,7 @@ const seed = async () => {
                 trailer: "https://www.youtube.com/watch?v=d9MyW72ELq0",
                 status: "Now Showing",
                 averageRating: 4.8,
-                numReviews: 124,
-                createdBy: admin._id
+                numReviews: 124
             },
             {
                 title: "Oppenheimer",
@@ -100,8 +55,7 @@ const seed = async () => {
                 trailer: "https://www.youtube.com/watch?v=uYPbbksJxIg",
                 status: "Now Showing",
                 averageRating: 4.9,
-                numReviews: 210,
-                createdBy: admin._id
+                numReviews: 210
             },
             {
                 title: "Interstellar",
@@ -115,8 +69,7 @@ const seed = async () => {
                 trailer: "https://www.youtube.com/watch?v=zSWdZVtXT7E",
                 status: "Now Showing",
                 averageRating: 4.9,
-                numReviews: 350,
-                createdBy: admin._id
+                numReviews: 350
             },
             {
                 title: "Dune: Part Two",
@@ -130,20 +83,18 @@ const seed = async () => {
                 trailer: "",
                 status: "Coming Soon",
                 averageRating: 0,
-                numReviews: 0,
-                createdBy: admin._id
+                numReviews: 0
             }
         ]);
 
         console.log("✅ Movies Seeded");
 
-        // 3. Create Theatres & Screens
+        // 2. Create Theatres & Screens
         const theatre = await Theatre.create({
             name: "PVR Grand Cinema",
             city: "Mumbai",
             address: "Phoenix Marketcity, Kurla West",
             phone: "022-67890123",
-            owner: owner._id,
             totalScreens: 2
         });
 
@@ -180,7 +131,7 @@ const seed = async () => {
 
         console.log("✅ Theatres & Screens Seeded");
 
-        // 4. Create Shows
+        // 3. Create Shows
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
@@ -222,7 +173,7 @@ const seed = async () => {
 
         console.log("✅ Shows Seeded");
 
-        // 5. Create Snacks
+        // 4. Create Snacks
         await Snack.insertMany([
             {
                 name: "Large Salted Popcorn",
@@ -260,7 +211,7 @@ const seed = async () => {
 
         console.log("✅ Snacks Seeded");
 
-        // 6. Create Coupons
+        // 5. Create Coupons
         await Coupon.insertMany([
             {
                 code: "WELCOME100",
@@ -283,13 +234,8 @@ const seed = async () => {
         console.log("✅ Coupons Seeded");
 
         console.log("\n==================================================");
-        console.log("🎉 ALL DEMO SEED DATA CREATED SUCCESSFULLY!");
-        console.log("==================================================");
-        console.log("Credentials:");
-        console.log("1. Admin:         admin@mms.com    / password123");
-        console.log("2. Theatre Owner: owner@mms.com    / password123");
-        console.log("3. Staff:         staff@mms.com    / password123");
-        console.log("4. Customer:      customer@mms.com / password123");
+        console.log("🎉 DATABASE SEEDED WITH NO DUMMY LOGINS!");
+        console.log("Users can register fresh accounts via /register");
         console.log("==================================================");
 
         process.exit(0);

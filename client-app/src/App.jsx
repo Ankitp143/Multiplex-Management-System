@@ -6,6 +6,7 @@ import NotFound from './pages/NotFound';
 // Auth pages
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
+import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
 
 // Public pages
 import HomePage from './pages/public/HomePage';
@@ -30,8 +31,13 @@ import AdminBookingsPage from './pages/admin/AdminBookingsPage';
 import AdminSnacksPage from './pages/admin/AdminSnacksPage';
 import AdminCouponsPage from './pages/admin/AdminCouponsPage';
 
+// Theatre Owner pages
+import OwnerDashboard from './pages/admin/OwnerDashboard';
+
 // Staff pages
+import StaffDashboard from './pages/staff/StaffDashboard';
 import StaffVerificationPage from './pages/staff/StaffVerificationPage';
+import StaffFoodOrdersPage from './pages/staff/StaffFoodOrdersPage';
 
 function App() {
   return (
@@ -44,6 +50,7 @@ function App() {
       <Route path="/movies/:id" element={<MovieDetailPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
       {/* Protected routes — guard then layout */}
       <Route element={<ProtectedRoute />}>
@@ -67,24 +74,25 @@ function App() {
           <Route path="/admin/theatres" element={<RoleRoute roles={['admin', 'theatre_owner']}><AdminTheatresPage /></RoleRoute>} />
           <Route path="/admin/screens" element={<RoleRoute roles={['admin', 'theatre_owner']}><AdminTheatresPage /></RoleRoute>} />
           <Route path="/admin/shows" element={<RoleRoute roles={['admin', 'theatre_owner']}><AdminShowsPage /></RoleRoute>} />
-          <Route path="/admin/users" element={<RoleRoute roles={['admin']}><AdminUsersPage /></RoleRoute>} />
+          <Route path="/admin/users" element={<RoleRoute roles={['admin', 'theatre_owner']}><AdminUsersPage /></RoleRoute>} />
           <Route path="/admin/bookings" element={<RoleRoute roles={['admin', 'theatre_owner']}><AdminBookingsPage /></RoleRoute>} />
           <Route path="/admin/snacks" element={<RoleRoute roles={['admin']}><AdminSnacksPage /></RoleRoute>} />
           <Route path="/admin/coupons" element={<RoleRoute roles={['admin']}><AdminCouponsPage /></RoleRoute>} />
           <Route path="/admin/reports" element={<RoleRoute roles={['admin', 'theatre_owner']}><AdminDashboard /></RoleRoute>} />
 
           {/* Theatre Owner routes */}
-          <Route path="/owner" element={<RoleRoute roles={['theatre_owner', 'admin']}><AdminDashboard /></RoleRoute>} />
+          <Route path="/owner" element={<RoleRoute roles={['theatre_owner', 'admin']}><OwnerDashboard /></RoleRoute>} />
           <Route path="/owner/theatres" element={<RoleRoute roles={['theatre_owner', 'admin']}><AdminTheatresPage /></RoleRoute>} />
           <Route path="/owner/screens" element={<RoleRoute roles={['theatre_owner', 'admin']}><AdminTheatresPage /></RoleRoute>} />
           <Route path="/owner/shows" element={<RoleRoute roles={['theatre_owner', 'admin']}><AdminShowsPage /></RoleRoute>} />
           <Route path="/owner/bookings" element={<RoleRoute roles={['theatre_owner', 'admin']}><AdminBookingsPage /></RoleRoute>} />
-          <Route path="/owner/reports" element={<RoleRoute roles={['theatre_owner', 'admin']}><AdminDashboard /></RoleRoute>} />
+          <Route path="/owner/reports" element={<RoleRoute roles={['theatre_owner', 'admin']}><OwnerDashboard /></RoleRoute>} />
+          <Route path="/owner/users" element={<RoleRoute roles={['theatre_owner']}><AdminUsersPage /></RoleRoute>} />
 
           {/* Staff routes */}
-          <Route path="/staff" element={<RoleRoute roles={['staff', 'admin']}><StaffVerificationPage /></RoleRoute>} />
+          <Route path="/staff" element={<RoleRoute roles={['staff', 'admin']}><StaffDashboard /></RoleRoute>} />
           <Route path="/staff/verify-ticket" element={<RoleRoute roles={['staff', 'admin']}><StaffVerificationPage /></RoleRoute>} />
-          <Route path="/staff/food-orders" element={<RoleRoute roles={['staff', 'admin']}><StaffVerificationPage /></RoleRoute>} />
+          <Route path="/staff/food-orders" element={<RoleRoute roles={['staff', 'admin']}><StaffFoodOrdersPage /></RoleRoute>} />
         </Route>
       </Route>
 

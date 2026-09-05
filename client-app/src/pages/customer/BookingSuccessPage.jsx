@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ticketAPI, bookingAPI } from '../../services/apiServices';
-import Navbar from '../../components/common/Navbar';
 
 const BookingSuccessPage = () => {
   const { bookingId } = useParams();
@@ -20,12 +19,10 @@ const BookingSuccessPage = () => {
       .finally(() => setLoading(false));
   }, [bookingId]);
 
-  if (loading) return <><Navbar /><div className="loading-page"><div className="spinner"/></div></>;
+  if (loading) return <div className="loading-page"><div className="spinner"/></div>;
 
   return (
-    <>
-      <Navbar />
-      <div style={{
+    <div style={{
         minHeight: 'calc(100vh - 64px)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         padding: '40px 16px',
@@ -94,8 +91,7 @@ const BookingSuccessPage = () => {
             <Link to="/movies" className="btn btn-primary">🎬 Browse More Movies</Link>
           </div>
         </div>
-      </div>
-    </>
+    </div>
   );
 };
 

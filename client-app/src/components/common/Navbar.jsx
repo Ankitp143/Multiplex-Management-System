@@ -18,6 +18,8 @@ const Navbar = () => {
 
   const getDashboardLink = () => {
     if (isAdmin) return '/admin';
+    if (isOwner) return '/owner';
+    if (isStaff) return '/staff';
     return '/booking-history';
   };
 

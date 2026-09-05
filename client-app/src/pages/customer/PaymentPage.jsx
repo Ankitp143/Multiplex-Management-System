@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { bookingAPI, paymentAPI } from '../../services/apiServices';
 import toast from 'react-hot-toast';
-import Navbar from '../../components/common/Navbar';
 
 const PaymentPage = () => {
   const { bookingId } = useParams();
@@ -39,13 +38,11 @@ const PaymentPage = () => {
     } finally { setProcessing(false); }
   };
 
-  if (loading) return <><Navbar /><div className="loading-page"><div className="spinner"/></div></>;
-  if (!booking) return <><Navbar /><div className="empty-state"><p>Booking not found</p></div></>;
+  if (loading) return <div className="loading-page"><div className="spinner"/></div>;
+  if (!booking) return <div className="empty-state"><p>Booking not found</p></div>;
 
   return (
-    <>
-      <Navbar />
-      <div style={{
+    <div style={{
         minHeight: 'calc(100vh - 64px)', display: 'flex', alignItems: 'center',
         justifyContent: 'center', padding: '40px 16px',
         background: 'radial-gradient(ellipse at 60% 50%, rgba(229,160,23,0.05) 0%, transparent 70%)'
@@ -142,7 +139,6 @@ const PaymentPage = () => {
           </div>
         </div>
       </div>
-    </>
   );
 };
 

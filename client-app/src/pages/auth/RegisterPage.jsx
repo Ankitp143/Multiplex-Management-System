@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { authAPI } from '../../services/apiServices';
 import { useAuth } from '../../context/AuthContext';
@@ -12,16 +12,31 @@ const RegisterPage = () => {
     firstName: '', lastName: '', email: '', password: '', phone: '', role: 'customer'
   });
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState({});
+  const [ownerExists, setOwnerExists] = useState(false);
+  const [checkingOwner, setCheckingOwner] = useState(true);
+
+  // Check if a theatre owner already exists in the system
+  useEffect(() => {
+    authAPI.checkOwnerExists()
+      .then(r => setOwnerExists(r.data.data.ownerExists))
+      .catch(() => setOwnerExists(false))
+      .finally(() => setCheckingOwner(false));
+  }, []);
+
+  const [regError, setRegError] = useState('');
 
   const handleChange = (e) => {
-    setForm(p => ({ ...p, [e.target.name]: e.target.value }));
-    setErrors(p => ({ ...p, [e.target.name]: '' }));
+    const { name, value } = e.target;
+    setRegError('');
+    // If owner role is taken, silently switch to customer
+    if (name === 'role' && value === 'theatre_owner' && ownerExists) return;
+    setForm(p => ({ ...p, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setRegError('');
     try {
       const { data } = await authAPI.register(form);
       if (data.success) {
@@ -36,6 +51,7 @@ const RegisterPage = () => {
     } catch (err) {
       const msg = err.response?.data?.message || 'Registration failed';
       toast.error(msg);
+      setRegError(msg);
     } finally {
       setLoading(false);
     }
@@ -96,15 +112,38 @@ const RegisterPage = () => {
 
               <div className="form-group">
                 <label className="form-label">Register As</label>
-                <select className="form-select" name="role" value={form.role} onChange={handleChange}>
+                <select className="form-select" name="role" value={form.role} onChange={handleChange}
+                  disabled={checkingOwner}>
                   <option value="customer">🎫 Customer</option>
-                  <option value="theatre_owner">🏢 Theatre Owner</option>
+                  <option value="theatre_owner" disabled={ownerExists}>
+                    🏢 Theatre Owner{ownerExists ? ' (Position Filled)' : ''}
+                  </option>
                   <option value="staff">🛂 Staff</option>
                   <option value="admin">⚙️ Admin</option>
                 </select>
+
+                {/* Owner already exists notice */}
+                {form.role === 'theatre_owner' && ownerExists && (
+                  <p style={{
+                    marginTop: 6, fontSize: '0.8rem', color: 'var(--red)',
+                    display: 'flex', alignItems: 'center', gap: 5
+                  }}>
+                    ⚠️ A Theatre Owner already exists. Only one owner is allowed.
+                  </p>
+                )}
+                {form.role === 'theatre_owner' && !ownerExists && !checkingOwner && (
+                  <p style={{
+                    marginTop: 6, fontSize: '0.8rem', color: 'var(--accent)',
+                    display: 'flex', alignItems: 'center', gap: 5
+                  }}>
+                    🏢 You will become the sole Theatre Owner of this multiplex system.
+                  </p>
+                )}
               </div>
 
-              <button type="submit" className="btn btn-primary btn-lg" disabled={loading} style={{ marginTop: 4 }}>
+              <button type="submit" className="btn btn-primary btn-lg"
+                disabled={loading || (form.role === 'theatre_owner' && ownerExists)}
+                style={{ marginTop: 4 }}>
                 {loading ? '⏳ Creating account...' : '🚀 Create Account'}
               </button>
             </form>
@@ -113,6 +152,18 @@ const RegisterPage = () => {
               Already have an account?{' '}
               <Link to="/login" style={{ color: 'var(--accent)', fontWeight: 600 }}>Sign In</Link>
             </p>
+
+            {regError && (
+              <p style={{
+                textAlign: 'center',
+                marginTop: 14,
+                color: '#ef4444',
+                fontSize: '0.85rem',
+                fontWeight: 500
+              }}>
+                ⚠️ {regError}
+              </p>
+            )}
           </div>
         </div>
       </div>

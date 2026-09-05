@@ -53,6 +53,7 @@ const OwnerSidebar = () => {
     { icon: '📽️', label: 'Screens', path: '/owner/screens' },
     { icon: '🎟️', label: 'Shows', path: '/owner/shows' },
     { icon: '📋', label: 'Bookings', path: '/owner/bookings' },
+    { icon: '👥', label: 'Users', path: '/owner/users' },
     { icon: '📈', label: 'Revenue', path: '/owner/reports' },
   ];
 
@@ -90,10 +91,12 @@ const StaffSidebar = () => {
       <Link to="/staff/food-orders" className={isActive('/staff/food-orders')}>
         <span>🍿</span><span>Food Orders</span>
       </Link>
-      <button className="sidebar-item" style={{ width: '100%', color: 'var(--red)', marginTop: 16 }}
-        onClick={() => { logout(); navigate('/'); }}>
-        <span>🚪</span><span>Logout</span>
-      </button>
+      <div style={{ marginTop: 'auto', paddingTop: 16 }}>
+        <button className="sidebar-item" style={{ width: '100%', color: 'var(--red)' }}
+          onClick={() => { logout(); navigate('/'); }}>
+          <span>🚪</span><span>Logout</span>
+        </button>
+      </div>
     </aside>
   );
 };

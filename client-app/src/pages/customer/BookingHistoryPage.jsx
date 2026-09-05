@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { bookingAPI, cancellationAPI } from '../../services/apiServices';
 import { useAuth } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
-import Navbar from '../../components/common/Navbar';
 
 const statusBadge = (status) => {
   const map = { Confirmed: 'badge-green', Pending: 'badge-gold', Cancelled: 'badge-red' };
@@ -36,9 +35,7 @@ const BookingHistoryPage = () => {
   };
 
   return (
-    <>
-      <Navbar />
-      <div className="container" style={{ padding: '32px 24px' }}>
+    <div className="container" style={{ padding: '32px 24px' }}>
         <div className="page-header">
           <div>
             <h1 className="page-title">📋 My Bookings</h1>
@@ -96,8 +93,7 @@ const BookingHistoryPage = () => {
             ))}
           </div>
         )}
-      </div>
-    </>
+    </div>
   );
 };
 

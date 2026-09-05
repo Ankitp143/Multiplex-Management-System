@@ -21,11 +21,14 @@ const LoginPage = () => {
 
   const handleChange = (e) => setForm(p => ({ ...p, [e.target.name]: e.target.value }));
 
+  const [unregisteredError, setUnregisteredError] = useState(false);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setUnregisteredError(false);
     try {
-      const { data } = await authAPI.login(form);
+      const { data } = await authAPI.login({ ...form, role: selectedRole });
       if (data.success) {
         login(data.data.user, data.data.token);
         toast.success(`Welcome back, ${data.data.user.firstName}! 🎬`);
@@ -36,7 +39,11 @@ const LoginPage = () => {
         else navigate('/booking-history');
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Invalid credentials');
+      const errorMsg = err.response?.data?.message || 'Invalid credentials';
+      toast.error(errorMsg);
+      if (err.response?.status === 404 || errorMsg.includes('register first')) {
+        setUnregisteredError(true);
+      }
     } finally {
       setLoading(false);
     }
@@ -129,6 +136,8 @@ const LoginPage = () => {
               </div>
             </div>
 
+
+
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               <div className="form-group">
                 <label className="form-label" style={{ fontWeight: 500 }}>Email Address</label>
@@ -149,7 +158,12 @@ const LoginPage = () => {
               </div>
 
               <div className="form-group">
-                <label className="form-label" style={{ fontWeight: 500 }}>Password</label>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                  <label className="form-label" style={{ fontWeight: 500, margin: 0 }}>Password</label>
+                  <Link to="/forgot-password" style={{ fontSize: '0.78rem', color: activeRoleObj.color }}>
+                    Forgot Password?
+                  </Link>
+                </div>
                 <input
                   className="form-input"
                   type="password"
@@ -191,6 +205,18 @@ const LoginPage = () => {
               Don't have an account yet?{' '}
               <Link to="/register" style={{ color: activeRoleObj.color, fontWeight: 600 }}>Create an account</Link>
             </p>
+
+            {unregisteredError && (
+              <p style={{
+                textAlign: 'center',
+                marginTop: 14,
+                color: '#ef4444',
+                fontSize: '0.85rem',
+                fontWeight: 500
+              }}>
+                ⚠️ No account found with this email address. Please register first to sign in.
+              </p>
+            )}
           </div>
         </div>
       </div>

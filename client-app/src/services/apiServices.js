@@ -8,6 +8,11 @@ export const authAPI = {
   changePassword: (data) => api.post('/auth/change-password', data),
   getAllUsers: () => api.get('/auth/users'),
   updateUser: (id, data) => api.put(`/auth/users/${id}`, data),
+  deleteUser: (id) => api.delete(`/auth/users/${id}`),
+  checkOwnerExists: () => api.get('/auth/check-owner'),
+  forgotPassword: (email) => api.post('/auth/forgot-password', { email }),
+  verifyOtp: (email, otp) => api.post('/auth/verify-otp', { email, otp }),
+  resetPassword: (data) => api.post('/auth/reset-password', data),
 };
 
 export const movieAPI = {
