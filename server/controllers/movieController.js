@@ -8,6 +8,17 @@ const createMovie = asyncHandler(async (req, res) => {
 });
 
 const getMovies = asyncHandler(async (req, res) => {
+    if (req.query.seed === "true") {
+        const Movie = require("../models/Movie");
+        const { seedDatabase, MOVIES_DATA } = require("../utils/seedData");
+        try {
+            await seedDatabase();
+        } catch (err) {
+            console.error("Seed failed on seed=true flag, direct inserting:", err);
+            await Movie.deleteMany({}).catch(() => {});
+            if (MOVIES_DATA) await Movie.insertMany(MOVIES_DATA).catch(() => {});
+        }
+    }
     const movies = await movieService.getAllMovies(req.query);
     return apiResponse.success(res, "Movies retrieved successfully", movies);
 });
