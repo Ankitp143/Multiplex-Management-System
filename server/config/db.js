@@ -1,4 +1,6 @@
 const mongoose = require("mongoose");
+const Movie = require("../models/Movie");
+const { seedDatabase } = require("../utils/seedData");
 
 const connectDB = async () => {
     try {
@@ -9,6 +11,13 @@ const connectDB = async () => {
         console.log(`📂 Database : ${connection.connection.name}`);
         console.log(`🖥️  Host     : ${connection.connection.host}`);
         console.log("==========================================");
+
+        // Auto seed movies and shows if database is empty
+        const movieCount = await Movie.countDocuments();
+        if (movieCount === 0) {
+            console.log("🎬 Empty database detected! Auto-seeding 10 movies and show schedules...");
+            await seedDatabase();
+        }
     } catch (error) {
         console.error("==========================================");
         console.error("❌ MongoDB Connection Failed");
