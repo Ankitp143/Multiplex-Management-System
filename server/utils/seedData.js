@@ -159,12 +159,12 @@ const seedDatabase = async () => {
         console.log("🌱 Starting Movie & Show Database Seed...");
 
         // Clear existing collection data
-        await Movie.deleteMany();
-        await Theatre.deleteMany();
-        await Screen.deleteMany();
-        await Show.deleteMany();
-        await Snack.deleteMany();
-        await Coupon.deleteMany();
+        await Movie.deleteMany({});
+        await Theatre.deleteMany({});
+        await Screen.deleteMany({});
+        await Show.deleteMany({});
+        await Snack.deleteMany({});
+        await Coupon.deleteMany({});
 
         // 1. Insert 10 Movies
         const movies = await Movie.insertMany(MOVIES_DATA);
