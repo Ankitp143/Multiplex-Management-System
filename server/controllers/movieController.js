@@ -10,7 +10,7 @@ const createMovie = asyncHandler(async (req, res) => {
 const getMovies = asyncHandler(async (req, res) => {
     const Show = require("../models/Show");
     const showCount = await Show.countDocuments();
-    if (showCount < 50) {
+    if (showCount < 100) {
         const { seedDatabase } = require("../utils/seedData");
         try {
             console.log("🎬 Auto-seeding 14-day schedule from getMovies...");

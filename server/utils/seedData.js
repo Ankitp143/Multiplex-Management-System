@@ -134,9 +134,9 @@ const getMoviesData = () => [
         certificate: "UA",
         poster: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=500&q=80",
         trailer: "https://www.youtube.com/watch?v=COv52Qyctws",
-        status: "Coming Soon",
-        averageRating: 0,
-        numReviews: 0
+        status: "Now Showing",
+        averageRating: 4.5,
+        numReviews: 45
     },
     {
         title: "Kalki 2898 AD",
@@ -148,9 +148,9 @@ const getMoviesData = () => [
         certificate: "UA",
         poster: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=500&q=80",
         trailer: "https://www.youtube.com/watch?v=kQDd1AhGIHk",
-        status: "Coming Soon",
-        averageRating: 0,
-        numReviews: 0
+        status: "Now Showing",
+        averageRating: 4.6,
+        numReviews: 60
     }
 ];
 
@@ -212,14 +212,14 @@ const seedDatabase = async () => {
 
         console.log("✅ Multiplex Theatres & Screens Created");
 
-        // 3. Create Shows for ALL Now Showing Movies for the Next 14 Days
+        // 3. Create Shows for ALL Movies for the Next 14 Days
         const getTodayUTC = () => {
             const d = new Date();
             return new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0));
         };
 
         const todayUTC = getTodayUTC();
-        const nowShowingMovies = movies.filter(m => m.status === "Now Showing");
+        const nowShowingMovies = movies;
         const showTimes = [
             { start: "10:30", end: "13:30" },
             { start: "14:00", end: "17:00" },
