@@ -10,7 +10,7 @@ const createTheatre = async (theatreData, ownerId) => {
     try {
         const Screen = require("../models/Screen");
         const { generateSeatLayout } = require("./screenService");
-        const numScreens = theatre.totalScreens || 2;
+        const numScreens = (theatre.totalScreens && theatre.totalScreens > 0) ? theatre.totalScreens : 2;
         for (let i = 1; i <= numScreens; i++) {
             const type = i % 2 === 1 ? "IMAX" : "4DX";
             await Screen.create({
@@ -22,6 +22,10 @@ const createTheatre = async (theatreData, ownerId) => {
                 cols: 8,
                 seatLayout: generateSeatLayout(6, 8)
             });
+        }
+        if (theatre.totalScreens < numScreens) {
+            theatre.totalScreens = numScreens;
+            await theatre.save();
         }
     } catch (err) {
         console.error("Auto screen creation error for theatre:", err.message);

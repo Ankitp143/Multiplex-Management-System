@@ -70,7 +70,7 @@ const getScreensByTheatre = async (theatreId) => {
     if (!screens || screens.length === 0) {
         const theatre = await Theatre.findById(theatreId);
         if (theatre) {
-            const numScreens = theatre.totalScreens || 2;
+            const numScreens = (theatre.totalScreens && theatre.totalScreens > 0) ? theatre.totalScreens : 2;
             const createdScreens = [];
             for (let i = 1; i <= numScreens; i++) {
                 const type = i % 2 === 1 ? "IMAX" : "4DX";
@@ -85,6 +85,8 @@ const getScreensByTheatre = async (theatreId) => {
                 });
                 createdScreens.push(s);
             }
+            theatre.totalScreens = createdScreens.length;
+            await theatre.save();
             screens = createdScreens;
         }
     }
