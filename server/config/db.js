@@ -24,6 +24,36 @@ const connectDB = async () => {
                 console.error("⚠️ Auto-seed warning during DB connect:", seedErr.message);
             }
         }
+
+        // Guarantee every existing theatre in database has screens
+        const Theatre = require("../models/Theatre");
+        const Screen = require("../models/Screen");
+        const { generateSeatLayout } = require("../services/screenService");
+        const allTheatres = await Theatre.find();
+        for (const t of allTheatres) {
+            const count = await Screen.countDocuments({ theatre: t._id });
+            if (count === 0) {
+                console.log(`📽️ Theatre "${t.name}" (${t._id}) has 0 screens. Generating default screens...`);
+                const numScreens = (t.totalScreens && t.totalScreens > 0) ? t.totalScreens : 2;
+                for (let i = 1; i <= numScreens; i++) {
+                    const type = i % 2 === 1 ? "IMAX" : "4DX";
+                    await Screen.create({
+                        theatre: t._id,
+                        name: `Audi ${i} (${type})`,
+                        screenType: type,
+                        seatingCapacity: 48,
+                        rows: 6,
+                        cols: 8,
+                        seatLayout: generateSeatLayout(6, 8)
+                    });
+                }
+                if (t.totalScreens < numScreens) {
+                    t.totalScreens = numScreens;
+                    await t.save();
+                }
+                console.log(`✅ Default screens created for "${t.name}"`);
+            }
+        }
     } catch (error) {
         console.error("==========================================");
         console.error("❌ MongoDB Connection Failed");
