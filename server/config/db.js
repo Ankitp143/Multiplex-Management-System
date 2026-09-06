@@ -12,12 +12,12 @@ const connectDB = async () => {
         console.log(`🖥️  Host     : ${connection.connection.host}`);
         console.log("==========================================");
 
-        // Auto seed movies and shows if database has fewer than 10 movies or fewer than 200 shows
+        // Auto seed movies and shows if database has fewer than 10 movies or fewer than 500 shows
         const Show = require("../models/Show");
         const movieCount = await Movie.countDocuments();
         const showCount = await Show.countDocuments();
-        if (movieCount < 10 || showCount < 200) {
-            console.log(`🎬 Found ${movieCount} movies & ${showCount} shows. Auto-seeding 14-day schedule...`);
+        if (movieCount < 10 || showCount < 500) {
+            console.log(`🎬 Found ${movieCount} movies & ${showCount} shows. Re-seeding full 14-day schedule for all 10 movies...`);
             try {
                 await seedDatabase();
             } catch (seedErr) {

@@ -228,44 +228,25 @@ const seedDatabase = async () => {
         ];
 
         const generatedShows = [];
-        let mIdx = 0;
 
         for (let dayOffset = 0; dayOffset < 14; dayOffset++) {
             const sDate = new Date(todayUTC);
             sDate.setUTCDate(todayUTC.getUTCDate() + dayOffset);
 
-            // Screen 1 shows
-            showTimes.forEach((st, idx) => {
-                const movie = nowShowingMovies[mIdx % nowShowingMovies.length];
-                generatedShows.push({
-                    movie: movie._id,
-                    theatre: theatre._id,
-                    screen: screen1._id,
-                    showDate: sDate,
-                    startTime: st.start,
-                    endTime: st.end,
-                    ticketPrice: 300 + (idx % 2 === 0 ? 50 : 100),
-                    status: "Scheduled",
-                    bookedSeats: dayOffset === 0 && idx === 0 ? ["A1", "A2"] : []
+            movies.forEach((movie, mIdx) => {
+                showTimes.forEach((st, idx) => {
+                    generatedShows.push({
+                        movie: movie._id,
+                        theatre: theatre._id,
+                        screen: (mIdx + idx) % 2 === 0 ? screen1._id : screen2._id,
+                        showDate: sDate,
+                        startTime: st.start,
+                        endTime: st.end,
+                        ticketPrice: 280 + (idx * 30),
+                        status: "Scheduled",
+                        bookedSeats: dayOffset === 0 && mIdx === 0 && idx === 0 ? ["A1", "A2"] : []
+                    });
                 });
-                mIdx++;
-            });
-
-            // Screen 2 shows
-            showTimes.forEach((st, idx) => {
-                const movie = nowShowingMovies[mIdx % nowShowingMovies.length];
-                generatedShows.push({
-                    movie: movie._id,
-                    theatre: theatre._id,
-                    screen: screen2._id,
-                    showDate: sDate,
-                    startTime: st.start,
-                    endTime: st.end,
-                    ticketPrice: 280 + (idx % 2 === 0 ? 40 : 80),
-                    status: "Scheduled",
-                    bookedSeats: dayOffset === 0 && idx === 1 ? ["B3", "B4"] : []
-                });
-                mIdx++;
             });
         }
 
