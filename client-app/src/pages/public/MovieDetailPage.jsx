@@ -85,12 +85,9 @@ const MovieDetailPage = () => {
               <span className="badge badge-gold">⭐ {movie.averageRating > 0 ? movie.averageRating.toFixed(1) : 'N/A'} ({movie.numReviews} reviews)</span>
             </div>
             <p style={{ color: 'var(--text-secondary)', maxWidth: 600, lineHeight: 1.7 }}>{movie.description}</p>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: 8, marginBottom: 16 }}>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: 8 }}>
               Genre: {movie.genre} &nbsp;|&nbsp; Release: {new Date(movie.releaseDate).toLocaleDateString('en-IN')}
             </p>
-            <button className="btn btn-primary btn-lg" onClick={() => document.getElementById('shows-section')?.scrollIntoView({ behavior: 'smooth' })}>
-              🎟️ Book Tickets
-            </button>
           </div>
         </div>
       </div>

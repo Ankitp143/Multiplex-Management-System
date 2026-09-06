@@ -35,7 +35,7 @@ const Navbar = () => {
 
         <nav className="navbar-nav">
           <Link to="/" className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}>Home</Link>
-          <Link to="/movies" className={`nav-link ${isActive('/movies')}`}>🎟️ Movies & Booking</Link>
+          <Link to="/movies" className={`nav-link ${isActive('/movies')}`}>Movies</Link>
           <Link to="/theatres" className={`nav-link ${isActive('/theatres')}`}>Theatres</Link>
           {isAuthenticated && <Link to="/booking-history" className={`nav-link ${isActive('/booking-history')}`}>My Bookings</Link>}
         </nav>

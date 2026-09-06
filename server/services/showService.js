@@ -41,24 +41,10 @@ const createShow = async (showData) => {
     return show;
 };
 
-const ensureShowsForDate = async (targetDateStr) => {
+const ensureShowsForDate = async (targetDateStr, movieId = null) => {
     const [year, month, day] = targetDateStr.split('-').map(Number);
     const startOfDay = new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
     const endOfDay = new Date(Date.UTC(year, month - 1, day, 23, 59, 59, 999));
-
-    const filter = {
-        showDate: { $gte: startOfDay, $lte: endOfDay },
-        status: { $ne: "Cancelled" }
-    };
-
-    const existingCount = await Show.countDocuments(filter);
-    if (existingCount >= 8) return;
-
-    let nowShowingMovies = await Movie.find({ status: "Now Showing" });
-    if (!nowShowingMovies || nowShowingMovies.length === 0) {
-        nowShowingMovies = await Movie.find({});
-    }
-    if (!nowShowingMovies || nowShowingMovies.length === 0) return;
 
     let theatre = await Theatre.findOne();
     if (!theatre) {
@@ -100,34 +86,78 @@ const ensureShowsForDate = async (targetDateStr) => {
         { start: "21:00", end: "23:55" }
     ];
 
-    if (existingCount > 0 && existingCount < 8) {
-        await Show.deleteMany({ showDate: { $gte: startOfDay, $lte: endOfDay } });
+    if (movieId) {
+        const targetMovie = await Movie.findById(movieId);
+        if (targetMovie) {
+            const countForMovie = await Show.countDocuments({
+                movie: targetMovie._id,
+                showDate: { $gte: startOfDay, $lte: endOfDay },
+                status: { $ne: "Cancelled" }
+            });
+
+            if (countForMovie === 0) {
+                const movieShows = [
+                    {
+                        movie: targetMovie._id, theatre: theatre._id, screen: screen1._id,
+                        showDate: startOfDay, startTime: "10:30", endTime: "13:30", ticketPrice: 300,
+                        status: "Scheduled", bookedSeats: []
+                    },
+                    {
+                        movie: targetMovie._id, theatre: theatre._id, screen: screen2._id,
+                        showDate: startOfDay, startTime: "14:00", endTime: "17:00", ticketPrice: 320,
+                        status: "Scheduled", bookedSeats: []
+                    },
+                    {
+                        movie: targetMovie._id, theatre: theatre._id, screen: screen1._id,
+                        showDate: startOfDay, startTime: "17:30", endTime: "20:30", ticketPrice: 350,
+                        status: "Scheduled", bookedSeats: []
+                    },
+                    {
+                        movie: targetMovie._id, theatre: theatre._id, screen: screen2._id,
+                        showDate: startOfDay, startTime: "21:00", endTime: "23:55", ticketPrice: 380,
+                        status: "Scheduled", bookedSeats: []
+                    }
+                ];
+                await Show.insertMany(movieShows);
+                console.log(`🎬 Dynamic showtimes created for ${targetMovie.title} on ${targetDateStr}`);
+            }
+        }
     }
 
-    const newShows = [];
-    let mIdx = (day * 3) % nowShowingMovies.length;
-
-    [screen1, screen2].forEach((screen, screenIdx) => {
-        showTimes.forEach((st, idx) => {
-            const movie = nowShowingMovies[mIdx % nowShowingMovies.length];
-            newShows.push({
-                movie: movie._id,
-                theatre: theatre._id,
-                screen: screen._id,
-                showDate: startOfDay,
-                startTime: st.start,
-                endTime: st.end,
-                ticketPrice: 280 + (idx * 30) + (screenIdx * 20),
-                status: "Scheduled",
-                bookedSeats: []
-            });
-            mIdx++;
-        });
+    const totalCount = await Show.countDocuments({
+        showDate: { $gte: startOfDay, $lte: endOfDay },
+        status: { $ne: "Cancelled" }
     });
 
-    if (newShows.length > 0) {
-        await Show.insertMany(newShows);
-        console.log(`🎬 Dynamically scheduled ${newShows.length} shows for date ${targetDateStr}`);
+    if (totalCount === 0) {
+        const allMovies = await Movie.find({});
+        if (!allMovies.length) return;
+
+        const newShows = [];
+        let mIdx = (day * 3) % allMovies.length;
+
+        [screen1, screen2].forEach((screen, screenIdx) => {
+            showTimes.forEach((st, idx) => {
+                const movie = allMovies[mIdx % allMovies.length];
+                newShows.push({
+                    movie: movie._id,
+                    theatre: theatre._id,
+                    screen: screen._id,
+                    showDate: startOfDay,
+                    startTime: st.start,
+                    endTime: st.end,
+                    ticketPrice: 280 + (idx * 30) + (screenIdx * 20),
+                    status: "Scheduled",
+                    bookedSeats: []
+                });
+                mIdx++;
+            });
+        });
+
+        if (newShows.length > 0) {
+            await Show.insertMany(newShows);
+            console.log(`🎬 Dynamically scheduled ${newShows.length} total shows for date ${targetDateStr}`);
+        }
     }
 };
 
@@ -137,7 +167,7 @@ const getShows = async (query = {}) => {
         ? (typeof query.showDate === 'string' ? query.showDate.split('T')[0] : new Date(query.showDate).toISOString().split('T')[0])
         : todayStr;
 
-    await ensureShowsForDate(targetDateStr);
+    await ensureShowsForDate(targetDateStr, query.movieId || null);
 
     const filter = { status: { $ne: "Cancelled" } };
     if (query.movieId) filter.movie = query.movieId;
