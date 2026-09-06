@@ -69,6 +69,31 @@ app.get(["/seed-all", "/api/seed-all", "/seed-now", "/api/seed-now", "/api/seed-
     }
 });
 
+app.get("/api/debug-theatre/:id", async (req, res) => {
+    try {
+        const Theatre = require("./models/Theatre");
+        const Screen = require("./models/Screen");
+        const screenService = require("./services/screenService");
+        
+        const theatreId = req.params.id;
+        const theatre = await Theatre.findById(theatreId);
+        const existingScreens = await Screen.find({ theatre: theatreId });
+        const serviceScreens = await screenService.getScreensByTheatre(theatreId);
+        
+        return res.json({
+            success: true,
+            theatreId,
+            theatreFound: !!theatre,
+            theatreDetails: theatre,
+            existingScreensCount: existingScreens.length,
+            serviceScreensCount: serviceScreens.length,
+            serviceScreens
+        });
+    } catch (e) {
+        return res.status(500).json({ error: e.message, stack: e.stack });
+    }
+});
+
 app.get("/api/debug-shows", async (req, res) => {
     try {
         const Show = require("./models/Show");
