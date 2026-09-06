@@ -42,84 +42,80 @@ const createShow = async (showData) => {
 };
 
 const ensureShowsForDate = async (targetDateStr, movieId = null) => {
-    try {
-        const [year, month, day] = targetDateStr.split('-').map(Number);
-        const startOfDay = new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
-        const endOfDay = new Date(Date.UTC(year, month - 1, day, 23, 59, 59, 999));
+    const [year, month, day] = targetDateStr.split('-').map(Number);
+    const startOfDay = new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
+    const endOfDay = new Date(Date.UTC(year, month - 1, day, 23, 59, 59, 999));
 
-        let theatre = await Theatre.findOne();
-        if (!theatre) {
-            theatre = await Theatre.create({
-                name: "PVR Grand Cinema", city: "Mumbai",
-                address: "Phoenix Marketcity, Kurla West", phone: "022-67890123", totalScreens: 2
-            });
-        }
+    let theatre = await Theatre.findOne();
+    if (!theatre) {
+        theatre = await Theatre.create({
+            name: "PVR Grand Cinema", city: "Mumbai",
+            address: "Phoenix Marketcity, Kurla West", phone: "022-67890123", totalScreens: 2
+        });
+    }
 
-        let screens = await Screen.find({ theatre: theatre._id });
-        if (!screens || screens.length === 0) screens = await Screen.find({});
-        if (!screens || screens.length === 0) {
-            const layout = [];
-            ["A", "B", "C", "D", "E", "F"].forEach(r => {
-                for (let c = 1; c <= 8; c++) {
-                    const type = (r === "E" || r === "F") ? "VIP" : (r === "C" || r === "D" ? "Premium" : "Standard");
-                    layout.push({ seatNo: `${r}${c}`, row: r, number: c, type, priceMultiplier: type === "VIP" ? 1.5 : 1.0 });
-                }
-            });
-            const s1 = await Screen.create({ theatre: theatre._id, name: "Audi 1 (IMAX 3D)", screenType: "IMAX", seatingCapacity: 48, rows: 6, cols: 8, seatLayout: layout });
-            const s2 = await Screen.create({ theatre: theatre._id, name: "Audi 2 (4DX)", screenType: "4DX", seatingCapacity: 48, rows: 6, cols: 8, seatLayout: layout });
-            screens = [s1, s2];
-        }
-
-        const screen1 = screens[0];
-        const screen2 = screens[1] || screens[0];
-
-        let moviesToSchedule = [];
-        if (movieId) {
-            const m = await Movie.findById(movieId);
-            if (m) moviesToSchedule.push(m);
-        }
-        if (moviesToSchedule.length === 0) {
-            moviesToSchedule = await Movie.find({});
-        }
-
-        const newShows = [];
-        const showTimes = [
-            { start: "10:30", end: "13:30", price: 300 },
-            { start: "14:00", end: "17:00", price: 320 },
-            { start: "17:30", end: "20:30", price: 350 },
-            { start: "21:00", end: "23:55", price: 380 }
-        ];
-
-        for (const movie of moviesToSchedule) {
-            const existingCount = await Show.countDocuments({
-                movie: movie._id,
-                showDate: { $gte: startOfDay, $lte: endOfDay },
-                status: { $ne: "Cancelled" }
-            });
-
-            if (existingCount === 0) {
-                showTimes.forEach((st, idx) => {
-                    newShows.push({
-                        movie: movie._id,
-                        theatre: theatre._id,
-                        screen: idx % 2 === 0 ? screen1._id : screen2._id,
-                        showDate: startOfDay,
-                        startTime: st.start,
-                        endTime: st.end,
-                        ticketPrice: st.price,
-                        status: "Scheduled",
-                        bookedSeats: []
-                    });
-                });
+    let screens = await Screen.find({ theatre: theatre._id });
+    if (!screens || screens.length === 0) screens = await Screen.find({});
+    if (!screens || screens.length === 0) {
+        const layout = [];
+        ["A", "B", "C", "D", "E", "F"].forEach(r => {
+            for (let c = 1; c <= 8; c++) {
+                const type = (r === "E" || r === "F") ? "VIP" : (r === "C" || r === "D" ? "Premium" : "Standard");
+                layout.push({ seatNo: `${r}${c}`, row: r, number: c, type, priceMultiplier: type === "VIP" ? 1.5 : 1.0 });
             }
-        }
+        });
+        const s1 = await Screen.create({ theatre: theatre._id, name: "Audi 1 (IMAX 3D)", screenType: "IMAX", seatingCapacity: 48, rows: 6, cols: 8, seatLayout: layout });
+        const s2 = await Screen.create({ theatre: theatre._id, name: "Audi 2 (4DX)", screenType: "4DX", seatingCapacity: 48, rows: 6, cols: 8, seatLayout: layout });
+        screens = [s1, s2];
+    }
 
-        if (newShows.length > 0) {
-            await Show.insertMany(newShows);
-            console.log(`🎬 Dynamically scheduled ${newShows.length} shows across movies for date ${targetDateStr}`);
+    const screen1 = screens[0];
+    const screen2 = screens[1] || screens[0];
+
+    let moviesToSchedule = [];
+    if (movieId) {
+        const m = await Movie.findById(movieId);
+        if (m) moviesToSchedule.push(m);
+    }
+    if (moviesToSchedule.length === 0) {
+        moviesToSchedule = await Movie.find({});
+    }
+
+    const newShows = [];
+    const showTimes = [
+        { start: "10:30", end: "13:30", price: 300 },
+        { start: "14:00", end: "17:00", price: 320 },
+        { start: "17:30", end: "20:30", price: 350 },
+        { start: "21:00", end: "23:55", price: 380 }
+    ];
+
+    for (const movie of moviesToSchedule) {
+        const existingCount = await Show.countDocuments({
+            movie: movie._id,
+            showDate: { $gte: startOfDay, $lte: endOfDay },
+            status: { $ne: "Cancelled" }
+        });
+
+        if (existingCount === 0) {
+            showTimes.forEach((st, idx) => {
+                newShows.push({
+                    movie: movie._id,
+                    theatre: theatre._id,
+                    screen: idx % 2 === 0 ? screen1._id : screen2._id,
+                    showDate: startOfDay,
+                    startTime: st.start,
+                    endTime: st.end,
+                    ticketPrice: st.price,
+                    status: "Scheduled",
+                    bookedSeats: []
+                });
+            });
         }
-    } catch (err) {
-        console.error("Error in ensureShowsForDate:", err);
+    }
+
+    if (newShows.length > 0) {
+        await Show.insertMany(newShows);
+        console.log(`🎬 Dynamically scheduled ${newShows.length} shows across movies for date ${targetDateStr}`);
     }
 };
 
