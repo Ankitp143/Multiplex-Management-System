@@ -1,5 +1,4 @@
-const Screen = require("../models/Screen");
-const Theatre = require("../models/Theatre");
+const mongoose = require("mongoose");
 const AppError = require("../utils/AppError");
 
 // Helper to generate seat grid automatically
@@ -33,7 +32,13 @@ const generateSeatLayout = (rowsCount, colsCount) => {
     return layout;
 };
 
+const getScreenModel = () => mongoose.model("Screen");
+const getTheatreModel = () => mongoose.model("Theatre");
+
 const createScreen = async (screenData, user) => {
+    const Screen = getScreenModel();
+    const Theatre = getTheatreModel();
+
     const { theatreId, name, screenType, seatingCapacity, rows = 8, cols = 10 } = screenData;
     
     const theatre = await Theatre.findById(theatreId);
@@ -49,7 +54,7 @@ const createScreen = async (screenData, user) => {
     const seatLayout = generateSeatLayout(rows, cols);
 
     const screen = await Screen.create({
-        theatre: theatreId,
+        theatre: theatre._id,
         name,
         screenType: screenType || "2D",
         seatingCapacity: calculatedCapacity,
@@ -66,6 +71,9 @@ const createScreen = async (screenData, user) => {
 };
 
 const getScreensByTheatre = async (theatreId) => {
+    const Screen = getScreenModel();
+    const Theatre = getTheatreModel();
+
     let screens = await Screen.find({ theatre: theatreId });
     if (!screens || screens.length === 0) {
         const theatre = await Theatre.findById(theatreId);
@@ -94,6 +102,7 @@ const getScreensByTheatre = async (theatreId) => {
 };
 
 const getScreenById = async (screenId) => {
+    const Screen = getScreenModel();
     const screen = await Screen.findById(screenId).populate("theatre");
     if (!screen) {
         throw new AppError("Screen not found", 404);
@@ -102,6 +111,7 @@ const getScreenById = async (screenId) => {
 };
 
 const updateScreen = async (screenId, updateData, user) => {
+    const Screen = getScreenModel();
     const screen = await Screen.findById(screenId).populate("theatre");
     if (!screen) {
         throw new AppError("Screen not found", 404);
@@ -122,6 +132,9 @@ const updateScreen = async (screenId, updateData, user) => {
 };
 
 const deleteScreen = async (screenId, user) => {
+    const Screen = getScreenModel();
+    const Theatre = getTheatreModel();
+
     const screen = await Screen.findById(screenId).populate("theatre");
     if (!screen) {
         throw new AppError("Screen not found", 404);

@@ -1,14 +1,18 @@
-const Theatre = require("../models/Theatre");
+const mongoose = require("mongoose");
 const AppError = require("../utils/AppError");
 
+const getTheatreModel = () => mongoose.model("Theatre");
+const getScreenModel = () => mongoose.model("Screen");
+
 const createTheatre = async (theatreData, ownerId) => {
+    const Theatre = getTheatreModel();
     const theatre = await Theatre.create({
         ...theatreData,
         owner: ownerId
     });
 
     try {
-        const Screen = require("../models/Screen");
+        const Screen = getScreenModel();
         const { generateSeatLayout } = require("./screenService");
         const numScreens = (theatre.totalScreens && theatre.totalScreens > 0) ? theatre.totalScreens : 2;
         for (let i = 1; i <= numScreens; i++) {
