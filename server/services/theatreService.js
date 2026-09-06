@@ -6,6 +6,27 @@ const createTheatre = async (theatreData, ownerId) => {
         ...theatreData,
         owner: ownerId
     });
+
+    try {
+        const Screen = require("../models/Screen");
+        const { generateSeatLayout } = require("./screenService");
+        const numScreens = theatre.totalScreens || 2;
+        for (let i = 1; i <= numScreens; i++) {
+            const type = i % 2 === 1 ? "IMAX" : "4DX";
+            await Screen.create({
+                theatre: theatre._id,
+                name: `Audi ${i} (${type})`,
+                screenType: type,
+                seatingCapacity: 48,
+                rows: 6,
+                cols: 8,
+                seatLayout: generateSeatLayout(6, 8)
+            });
+        }
+    } catch (err) {
+        console.error("Auto screen creation error for theatre:", err.message);
+    }
+
     return theatre;
 };
 

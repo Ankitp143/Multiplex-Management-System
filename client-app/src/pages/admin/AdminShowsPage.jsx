@@ -20,7 +20,7 @@ const AdminShowsPage = () => {
     try {
       const [showsRes, moviesRes, theatresRes] = await Promise.all([
         showAPI.getAll(),
-        movieAPI.getAll({ status: 'Now Showing' }),
+        movieAPI.getAll(),
         theatreAPI.getAll()
       ]);
       setShows(showsRes.data.data || []);
@@ -42,7 +42,11 @@ const AdminShowsPage = () => {
     if (!tId) { setScreens([]); return; }
     try {
       const { data } = await screenAPI.getByTheatre(tId);
-      setScreens(data.data || []);
+      const fetchedScreens = data.data || [];
+      setScreens(fetchedScreens);
+      if (fetchedScreens.length > 0) {
+        setForm(p => ({ ...p, theatreId: tId, screenId: fetchedScreens[0]._id }));
+      }
     } catch {
       setScreens([]);
     }
@@ -82,7 +86,13 @@ const AdminShowsPage = () => {
           <h1 className="page-title">🎟️ Show Scheduling</h1>
           <p className="page-subtitle">Schedule movie screenings across theatres and screens</p>
         </div>
-        <button className="btn btn-primary" onClick={() => { setForm(EMPTY_SHOW); setShowModal(true); }}>
+        <button className="btn btn-primary" onClick={() => {
+          setForm(EMPTY_SHOW);
+          setShowModal(true);
+          if (theatres.length > 0) {
+            handleTheatreChange(theatres[0]._id);
+          }
+        }}>
           ➕ Schedule New Show
         </button>
       </div>

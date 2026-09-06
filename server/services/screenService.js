@@ -66,7 +66,29 @@ const createScreen = async (screenData, user) => {
 };
 
 const getScreensByTheatre = async (theatreId) => {
-    return await Screen.find({ theatre: theatreId });
+    let screens = await Screen.find({ theatre: theatreId });
+    if (!screens || screens.length === 0) {
+        const theatre = await Theatre.findById(theatreId);
+        if (theatre) {
+            const numScreens = theatre.totalScreens || 2;
+            const createdScreens = [];
+            for (let i = 1; i <= numScreens; i++) {
+                const type = i % 2 === 1 ? "IMAX" : "4DX";
+                const s = await Screen.create({
+                    theatre: theatreId,
+                    name: `Audi ${i} (${type})`,
+                    screenType: type,
+                    seatingCapacity: 48,
+                    rows: 6,
+                    cols: 8,
+                    seatLayout: generateSeatLayout(6, 8)
+                });
+                createdScreens.push(s);
+            }
+            screens = createdScreens;
+        }
+    }
+    return screens;
 };
 
 const getScreenById = async (screenId) => {
