@@ -68,34 +68,26 @@ const createScreen = async (screenData, user) => {
 const getScreensByTheatre = async (theatreId) => {
     let screens = await Screen.find({ theatre: theatreId });
     if (!screens || screens.length === 0) {
-        console.log(`[getScreensByTheatre] No screens found for theatreId ${theatreId}. Auto-generating...`);
-        try {
-            const theatre = await Theatre.findById(theatreId);
-            if (theatre) {
-                const numScreens = (theatre.totalScreens && theatre.totalScreens > 0) ? theatre.totalScreens : 2;
-                const createdScreens = [];
-                for (let i = 1; i <= numScreens; i++) {
-                    const type = i % 2 === 1 ? "IMAX" : "4DX";
-                    const s = await Screen.create({
-                        theatre: theatre._id,
-                        name: `Audi ${i} (${type})`,
-                        screenType: type,
-                        seatingCapacity: 48,
-                        rows: 6,
-                        cols: 8,
-                        seatLayout: generateSeatLayout(6, 8)
-                    });
-                    createdScreens.push(s);
-                }
-                theatre.totalScreens = createdScreens.length;
-                await theatre.save();
-                screens = createdScreens;
-                console.log(`[getScreensByTheatre] Successfully created ${createdScreens.length} screens for theatre ${theatreId}`);
-            } else {
-                console.log(`[getScreensByTheatre] Theatre ${theatreId} not found in DB`);
+        const theatre = await Theatre.findById(theatreId);
+        if (theatre) {
+            const numScreens = (theatre.totalScreens && theatre.totalScreens > 0) ? theatre.totalScreens : 2;
+            const createdScreens = [];
+            for (let i = 1; i <= numScreens; i++) {
+                const type = i % 2 === 1 ? "IMAX" : "4DX";
+                const s = await Screen.create({
+                    theatre: theatre._id,
+                    name: `Audi ${i} (${type})`,
+                    screenType: type,
+                    seatingCapacity: 48,
+                    rows: 6,
+                    cols: 8,
+                    seatLayout: generateSeatLayout(6, 8)
+                });
+                createdScreens.push(s);
             }
-        } catch (err) {
-            console.error(`[getScreensByTheatre] Error auto-creating screens for ${theatreId}:`, err.message);
+            theatre.totalScreens = createdScreens.length;
+            await theatre.save();
+            screens = createdScreens;
         }
     }
     return screens;
