@@ -22,12 +22,15 @@ const BookingHistoryPage = () => {
       .finally(() => setLoading(false));
   }, []);
 
-  const handleCancel = async (bookingId) => {
-    if (!window.confirm('Are you sure you want to cancel this booking? 85% refund will be issued.')) return;
+  const handleCancel = async (bookingId, currentStatus = 'Confirmed') => {
+    const confirmMsg = currentStatus === 'Pending'
+      ? 'Are you sure you want to cancel this pending booking?'
+      : 'Are you sure you want to cancel this booking? 85% refund will be issued.';
+    if (!window.confirm(confirmMsg)) return;
     setCancellingId(bookingId);
     try {
       await cancellationAPI.request({ bookingId, reason: 'Customer requested cancellation' });
-      toast.success('Booking cancelled. Refund initiated.');
+      toast.success(currentStatus === 'Pending' ? 'Pending booking cancelled.' : 'Booking cancelled. Refund initiated.');
       setBookings(prev => prev.map(b => b._id === bookingId ? { ...b, bookingStatus: 'Cancelled' } : b));
     } catch (err) {
       toast.error(err.response?.data?.message || 'Cancellation failed');
@@ -79,9 +82,12 @@ const BookingHistoryPage = () => {
                       {booking.bookingStatus === 'Confirmed' && (
                         <Link to={`/ticket/${booking._id}`} className="btn btn-secondary btn-sm">🎟️ View Ticket</Link>
                       )}
-                      {booking.bookingStatus === 'Confirmed' && (
+                      {booking.bookingStatus === 'Pending' && (
+                        <Link to={`/payment/${booking._id}`} className="btn btn-primary btn-sm">💳 Complete Payment</Link>
+                      )}
+                      {(booking.bookingStatus === 'Confirmed' || booking.bookingStatus === 'Pending') && (
                         <button className="btn btn-danger btn-sm"
-                          onClick={() => handleCancel(booking._id)}
+                          onClick={() => handleCancel(booking._id, booking.bookingStatus)}
                           disabled={cancellingId === booking._id}>
                           {cancellingId === booking._id ? '⏳...' : '❌ Cancel'}
                         </button>

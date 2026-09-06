@@ -72,16 +72,7 @@ const ensureShowsForDate = async (targetDateStr, movieId = null) => {
     const screen1 = screens[0];
     const screen2 = screens[1] || screens[0];
 
-    let moviesToSchedule = [];
-    if (movieId) {
-        const m = await Movie.findById(movieId);
-        if (m) moviesToSchedule.push(m);
-    }
-    if (moviesToSchedule.length === 0) {
-        moviesToSchedule = await Movie.find({});
-    }
-
-    const newShows = [];
+    const allMovies = await Movie.find({});
     const showTimes = [
         { start: "10:30", end: "13:30", price: 300 },
         { start: "14:00", end: "17:00", price: 320 },
@@ -89,7 +80,9 @@ const ensureShowsForDate = async (targetDateStr, movieId = null) => {
         { start: "21:00", end: "23:55", price: 380 }
     ];
 
-    for (const movie of moviesToSchedule) {
+    const newShows = [];
+
+    for (const movie of allMovies) {
         const existingCount = await Show.countDocuments({
             movie: movie._id,
             showDate: { $gte: startOfDay, $lte: endOfDay },
@@ -115,7 +108,7 @@ const ensureShowsForDate = async (targetDateStr, movieId = null) => {
 
     if (newShows.length > 0) {
         await Show.insertMany(newShows);
-        console.log(`🎬 Dynamically scheduled ${newShows.length} shows across movies for date ${targetDateStr}`);
+        console.log(`🎬 Dynamically scheduled ${newShows.length} shows across ALL movies for date ${targetDateStr}`);
     }
 };
 

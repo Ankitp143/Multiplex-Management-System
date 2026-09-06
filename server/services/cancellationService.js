@@ -19,18 +19,21 @@ const requestCancellation = async (bookingId, reason, userId) => {
         throw new AppError("Booking is already cancelled", 400);
     }
 
-    // Refund policy: 85% refund of finalAmount
-    const refundAmount = Math.round(booking.finalAmount * 0.85);
+    // Refund policy: 85% refund of finalAmount if Confirmed, 0 if Pending
+    const refundAmount = booking.bookingStatus === "Confirmed" ? Math.round(booking.finalAmount * 0.85) : 0;
 
     booking.bookingStatus = "Cancelled";
     await booking.save();
 
     // Release seats in Show model
-    const show = await Show.findById(booking.show._id);
-    if (show) {
-        const seatNosToRelease = booking.seats.map(s => s.seatNo);
-        show.bookedSeats = show.bookedSeats.filter(s => !seatNosToRelease.includes(s));
-        await show.save();
+    if (booking.show) {
+        const show = await Show.findById(booking.show._id || booking.show);
+        if (show) {
+            const seatNosToRelease = booking.seats.map(s => s.seatNo);
+            show.bookedSeats = show.bookedSeats.filter(s => !seatNosToRelease.includes(s));
+            show.lockedSeats = show.lockedSeats.filter(l => l.userId.toString() !== userId.toString());
+            await show.save();
+        }
     }
 
     // Cancel ticket if exists
@@ -41,7 +44,7 @@ const requestCancellation = async (bookingId, reason, userId) => {
         booking: booking._id,
         user: userId,
         refundAmount,
-        refundStatus: "Processed",
+        refundStatus: refundAmount > 0 ? "Processed" : "N/A",
         reason: reason || "User requested cancellation",
         processedAt: new Date()
     });
