@@ -124,7 +124,7 @@ app.get("/api/debug-shows", async (req, res) => {
 app.get("/", (req, res) => {
     return res.status(200).json({
         success: true,
-        message: "🚀 Welcome to Multiplex Management System API",
+        message: "🚀 Welcome to CineMax API",
         systemTime: new Date().toISOString()
     });
 });

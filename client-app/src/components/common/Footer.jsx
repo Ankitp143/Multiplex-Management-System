@@ -20,7 +20,7 @@ const Footer = () => {
         gap: 8
       }}>
         <span>🎬</span>
-        <span>CineMax Multiplex Management System</span>
+        <span>CineMax</span>
         <span style={{ margin: '0 4px', opacity: 0.5 }}>|</span>
         <span>© 2026 CineMax Inc. All Rights Reserved.</span>
       </div>

@@ -38,10 +38,10 @@ const createTransporter = async () => {
 const sendPasswordResetOTP = async (toEmail, otp) => {
     const transporter = await createTransporter();
     
-    const subject = "🔒 Your Password Reset OTP - Multiplex Management System";
+    const subject = "🔒 Your Password Reset OTP - CineMax";
     const html = `
         <div style="font-family: Arial, sans-serif; background-color: #0d0f17; color: #ffffff; padding: 30px; border-radius: 10px; max-width: 500px; margin: 0 auto;">
-            <h2 style="color: #e5a017; text-align: center;">🎬 Multiplex Management</h2>
+            <h2 style="color: #e5a017; text-align: center;">🎬 CineMax</h2>
             <hr style="border-color: #262938; margin-bottom: 20px;" />
             <h3 style="text-align: center;">Password Reset Verification Code</h3>
             <p>You requested to reset your password. Use the 6-digit OTP code below to reset your password:</p>
