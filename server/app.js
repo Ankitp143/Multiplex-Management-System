@@ -49,7 +49,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Direct Seed Route
-app.get(["/seed-now", "/api/seed-now", "/api/seed-database", "/api/force-seed"], async (req, res) => {
+app.get(["/seed-all", "/api/seed-all", "/seed-now", "/api/seed-now", "/api/seed-database", "/api/force-seed"], async (req, res) => {
     try {
         const Movie = require("./models/Movie");
         const Show = require("./models/Show");
