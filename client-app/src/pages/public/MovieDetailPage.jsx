@@ -40,7 +40,17 @@ const MovieDetailPage = () => {
       const params = { movieId: movie._id };
       if (selectedDate) params.showDate = selectedDate;
       showAPI.getAll(params)
-        .then(r => setShows(r.data.data || []))
+        .then(r => {
+          const fetchedShows = r.data.data || [];
+          if (fetchedShows.length > 0) {
+            setShows(fetchedShows);
+          } else {
+            // Fallback: fetch all available shows for this movie regardless of date filter
+            showAPI.getAll({ movieId: movie._id })
+              .then(res => setShows(res.data.data || []))
+              .catch(() => setShows([]));
+          }
+        })
         .catch(() => setShows([]));
     }
   }, [movie, selectedDate]);
