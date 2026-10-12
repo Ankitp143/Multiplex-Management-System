@@ -53,7 +53,6 @@ const LoginPage = () => {
     } catch (err) {
       const errorMsg = err.response?.data?.message || 'Incorrect email or password. Please try again.';
       setErrorMessage(errorMsg);
-      toast.error(errorMsg);
       if (err.response?.status === 404 || errorMsg.includes('register first')) {
         setUnregisteredError(true);
       }
