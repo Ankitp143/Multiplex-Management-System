@@ -34,9 +34,11 @@ const LoginPage = () => {
   };
 
   const handleRoleSelect = (roleId) => {
+    setSelectedRole(roleId);
+    setForm({ email: '', password: '' });
     setErrorMessage('');
     setUnregisteredError(false);
-    setSelectedRole(roleId);
+    setShowPassword(false);
   };
 
   const handleSubmit = async (e) => {
@@ -59,8 +61,8 @@ const LoginPage = () => {
     } catch (err) {
       const errorMsg = err.response?.data?.message || 'Incorrect email or password. Please try again.';
       setErrorMessage(errorMsg);
-      // Remove password after failed check so user can re-enter freshly
-      setForm(p => ({ ...p, password: '' }));
+      // Remove credentials from form upon failed check
+      setForm({ email: '', password: '' });
       if (err.response?.status === 404 || errorMsg.includes('register first')) {
         setUnregisteredError(true);
       }
@@ -175,13 +177,14 @@ const LoginPage = () => {
               </div>
             )}
 
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <form onSubmit={handleSubmit} autoComplete="off" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               <div className="form-group">
                 <label className="form-label" style={{ fontWeight: 500 }}>Email Address</label>
                 <input
                   className="form-input"
                   type="email"
                   name="email"
+                  autoComplete="off"
                   value={form.email}
                   onChange={handleChange}
                   placeholder={`Enter ${activeRoleObj.label} email...`}
@@ -206,6 +209,7 @@ const LoginPage = () => {
                     className="form-input"
                     type={showPassword ? 'text' : 'password'}
                     name="password"
+                    autoComplete="new-password"
                     value={form.password}
                     onChange={handleChange}
                     placeholder="••••••••"
