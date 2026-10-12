@@ -20,10 +20,20 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const url = error.config?.url || '';
+    const isAuthEndpoint = url.includes('/auth/login') ||
+                           url.includes('/auth/register') ||
+                           url.includes('/auth/forgot-password') ||
+                           url.includes('/auth/verify-otp') ||
+                           url.includes('/auth/reset-password');
+
+    // Only redirect to /login if 401 occurs on protected routes, NOT during login/auth attempts
+    if (error.response?.status === 401 && !isAuthEndpoint) {
       localStorage.removeItem('mms_token');
       localStorage.removeItem('mms_user');
-      window.location.href = '/login';
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }
