@@ -19,14 +19,25 @@ const LoginPage = () => {
   const [selectedRole, setSelectedRole] = useState('customer');
   const [form, setForm] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
-
-  const handleChange = (e) => setForm(p => ({ ...p, [e.target.name]: e.target.value }));
-
+  const [errorMessage, setErrorMessage] = useState('');
   const [unregisteredError, setUnregisteredError] = useState(false);
+
+  const handleChange = (e) => {
+    setErrorMessage('');
+    setUnregisteredError(false);
+    setForm(p => ({ ...p, [e.target.name]: e.target.value }));
+  };
+
+  const handleRoleSelect = (roleId) => {
+    setErrorMessage('');
+    setUnregisteredError(false);
+    setSelectedRole(roleId);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setErrorMessage('');
     setUnregisteredError(false);
     try {
       const { data } = await authAPI.login({ ...form, role: selectedRole });
@@ -40,7 +51,8 @@ const LoginPage = () => {
         else navigate('/booking-history');
       }
     } catch (err) {
-      const errorMsg = err.response?.data?.message || 'Invalid credentials';
+      const errorMsg = err.response?.data?.message || 'Incorrect email or password. Please try again.';
+      setErrorMessage(errorMsg);
       toast.error(errorMsg);
       if (err.response?.status === 404 || errorMsg.includes('register first')) {
         setUnregisteredError(true);
@@ -118,7 +130,7 @@ const LoginPage = () => {
                     <button
                       key={role.id}
                       type="button"
-                      onClick={() => setSelectedRole(role.id)}
+                      onClick={() => handleRoleSelect(role.id)}
                       style={{
                         display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
                         padding: '8px 4px', borderRadius: 8,
@@ -137,7 +149,24 @@ const LoginPage = () => {
               </div>
             </div>
 
-
+            {errorMessage && (
+              <div style={{
+                background: 'rgba(239, 68, 68, 0.12)',
+                border: '1px solid rgba(239, 68, 68, 0.35)',
+                color: '#fca5a5',
+                padding: '12px 14px',
+                borderRadius: 10,
+                fontSize: '0.88rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                marginBottom: 16,
+                animation: 'fadeIn 0.2s ease-in-out'
+              }}>
+                <span style={{ fontSize: '1.2rem', lineHeight: 1 }}>⚠️</span>
+                <span style={{ flex: 1, lineHeight: 1.4 }}>{errorMessage}</span>
+              </div>
+            )}
 
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               <div className="form-group">
@@ -208,15 +237,19 @@ const LoginPage = () => {
             </p>
 
             {unregisteredError && (
-              <p style={{
+              <div style={{
                 textAlign: 'center',
                 marginTop: 14,
-                color: '#ef4444',
+                padding: '10px 14px',
+                background: 'rgba(239, 68, 68, 0.1)',
+                border: '1px solid rgba(239, 68, 68, 0.25)',
+                borderRadius: 8,
+                color: '#f87171',
                 fontSize: '0.85rem',
                 fontWeight: 500
               }}>
-                ⚠️ No account found with this email address. Please register first to sign in.
-              </p>
+                No account found with this email. <Link to="/register" style={{ color: activeRoleObj.color, fontWeight: 600, textDecoration: 'underline' }}>Register now</Link>
+              </div>
             )}
           </div>
         </div>
