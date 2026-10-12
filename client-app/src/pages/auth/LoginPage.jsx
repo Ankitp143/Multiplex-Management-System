@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { authAPI } from '../../services/apiServices';
 import { useAuth } from '../../context/AuthContext';
@@ -22,6 +22,10 @@ const LoginPage = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [unregisteredError, setUnregisteredError] = useState(false);
 
+  useEffect(() => {
+    toast.dismiss();
+  }, []);
+
   const handleChange = (e) => {
     setErrorMessage('');
     setUnregisteredError(false);
@@ -36,6 +40,7 @@ const LoginPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    toast.dismiss();
     setLoading(true);
     setErrorMessage('');
     setUnregisteredError(false);
