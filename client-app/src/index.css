@@ -152,6 +152,22 @@ h3 { font-size: clamp(1.1rem, 2vw, 1.4rem); }
 }
 .form-input::placeholder { color: var(--text-muted); }
 
+/* Hide browser's native/default faded password reveal button (Edge, IE, Chromium) */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  pointer-events: none !important;
+}
+
+input::-webkit-credentials-auto-fill-button {
+  visibility: hidden !important;
+  pointer-events: none !important;
+  position: absolute !important;
+  right: 0 !important;
+}
+
 .form-select {
   background: var(--bg-elevated);
   border: 1px solid var(--border);
